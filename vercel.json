@@ -10,22 +10,18 @@
       "runtime": "vercel-php@0.6.0"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/send-mail.php",
-      "dest": "/api/send-mail.php"
+      "source": "/send-mail.php",
+      "destination": "/api/send-mail.php"
     },
     {
-      "src": "/approve.php", 
-      "dest": "/api/approve.php"
+      "source": "/approve.php", 
+      "destination": "/api/approve.php"
     },
     {
-      "src": "/form-handler.php",
-      "dest": "/api/form-handler.php"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/form-handler.php",
+      "destination": "/api/form-handler.php"
     }
   ],
   "headers": [
