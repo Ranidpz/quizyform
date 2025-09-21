@@ -1,0 +1,39 @@
+# Quizy Form - הגדרות אבטחה ונתיבים
+
+# הגנה על קבצים רגישים
+<FilesMatch "\.log$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# הגדרות PHP
+<IfModule mod_php7.c>
+    php_flag display_errors off
+    php_value error_reporting 0
+    php_flag session.use_only_cookies on
+    php_flag session.use_trans_sid off
+</IfModule>
+
+# הגדרות אבטחה
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# הפעלת mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # הפניית שגיאות 404 לדף מותאם
+    ErrorDocument 404 /thank_you.html?error=404
+</IfModule>
+
+# הגדרות קאש
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+</IfModule>

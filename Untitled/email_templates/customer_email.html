@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>אישור בקשת מנוי אחסנת קבצים</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #1976d2; color: white; padding: 15px; text-align: center; }
+        .content { padding: 20px; background-color: #f9f9f9; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; }
+        .highlight { color: #1976d2; font-weight: bold; }
+        .button { display: inline-block; background-color: #ff9800; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0; text-align: center; font-weight: bold; }
+        .package-details { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .important-note { background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border-right: 4px solid #ff9800; }
+        .contact-info { background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>אישור בקשת מנוי אחסנת קבצים</h1>
+        </div>
+        <div class="content">
+            <p>שלום <span class="highlight">{{customer_name}}</span>,</p>
+            
+            <p>תודה על בקשתך למנוי אחסנת קבצים בשרתי קוויזי גיים.</p>
+            
+            <div class="package-details">
+                <h3>פרטי החבילה שבחרת:</h3>
+                <p>
+                    <strong>שם החבילה:</strong> {{package_name}}<br>
+                    <strong>נפח אחסון:</strong> {{package_size}}<br>
+                    <strong>מחיר חודשי:</strong> ₪{{package_price}}
+                </p>
+            </div>
+            
+            <p>להשלמת תהליך ההרשמה וביצוע התשלום, אנא לחץ/י על הכפתור הבא:</p>
+            
+            <div style="text-align: center;">
+                <a href="{{payment_link}}" class="button">לתשלום ופתיחת המנוי</a>
+            </div>
+            
+            <div class="important-note">
+                <p><strong>מידע חשוב:</strong></p>
+                <p>המנוי הינו בהוראת קבע לשנה ומתחדש באופן אוטומטי אלא אם בחרת אחרת.</p>
+                <p>לאחר השלמת התשלום אנו נפתח את המנוי בתוך מספר דקות ותקבל/י מייל אישור נוסף.</p>
+                <p>ניתן לשנות את החבילה במהלך תקופת השירות. ביטול או שינוי נעשים בפנייה בכתב ואישור לכך על ידי המערכת.</p>
+            </div>
+            
+            <div class="contact-info">
+                <p>אם יש לך שאלות נוספות, אנא צור/י קשר עם צוות התמיכה שלנו:</p>
+                <p>
+                    <strong>טלפון:</strong> 077-300-6306<br>
+                    <strong>אימייל:</strong> <a href="mailto:info@playzone.co.il">info@playzone.co.il</a><br>
+                    <strong>וואטסאפ:</strong> <a href="https://wa.me/972773006306">077-300-6306</a>
+                </p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>בברכה,<br>צוות קוויזי גיים</p>
+            <p><small>© 2023 פלייזון בע"מ | <a href="https://quizy.co.il/terms">תנאי שימוש</a></small></p>
+        </div>
+    </div>
+</body>
+</html> 

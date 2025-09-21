@@ -1,0 +1,50 @@
+{
+  "functions": {
+    "api/send-mail.php": {
+      "runtime": "vercel-php@0.6.0"
+    },
+    "api/approve.php": {
+      "runtime": "vercel-php@0.6.0"
+    },
+    "api/form-handler.php": {
+      "runtime": "vercel-php@0.6.0"
+    }
+  },
+  "routes": [
+    {
+      "src": "/send-mail.php",
+      "dest": "/api/send-mail.php"
+    },
+    {
+      "src": "/approve.php", 
+      "dest": "/api/approve.php"
+    },
+    {
+      "src": "/form-handler.php",
+      "dest": "/api/form-handler.php"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-Requested-With, Content-Type, Accept, Authorization"
+        }
+      ]
+    }
+  ]
+}

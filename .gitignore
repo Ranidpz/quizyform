@@ -1,0 +1,43 @@
+# Logs
+logs/
+*.log
+form_submissions.log
+
+# Debug emails (local testing only)
+debug_emails/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# PHP temporary files
+*.tmp
+
+# Backup files
+*.bak
+backup_*/
+
+# Test files (should not be in production)
+test-*.php
+
+# Node modules (if any)
+node_modules/
+
+# Temporary uploads
+uploads/temp/

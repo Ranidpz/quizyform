@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שגיאה | Quizy Cloud Storage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .error-icon {
+            font-size: 64px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .error-message {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        
+        .error-details {
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 500px;
+            text-align: right;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="logo-container">
+                    <a href="https://quizy.co.il" target="_blank">
+                        <img src="media/logo.png" alt="Quizy Logo" class="logo">
+                    </a>
+                </div>
+                <h1>שגיאה בטופס <span class="quizy-link">קוויזי גיים</span></h1>
+            </div>
+            
+            <div class="error-container">
+                <div class="error-icon">
+                    <i class="material-icons">error_outline</i>
+                </div>
+                
+                <h2 class="error-title">אירעה שגיאה בעת שליחת הטופס</h2>
+                
+                <p class="error-message" id="errorMessage">
+                    לא ניתן לעבד את בקשתך כרגע. אנא נסו שוב מאוחר יותר.
+                </p>
+                
+                <div class="error-details" id="errorDetails">
+                    <p>קוד שגיאה: <span id="errorCode">כללי</span></p>
+                    <p>זמן: <span id="errorTime"></span></p>
+                </div>
+                
+                <a href="https://quizygame.com" class="back-button">חזרה לדף הבית</a>
+            </div>
+            
+            <footer>
+                <div class="contact-title">
+                    <h4>צריכים עזרה?</h4>
+                    <p>צוות התמיכה שלנו זמין לכל שאלה</p>
+                </div>
+                
+                <div class="contact-buttons">
+                    <a href="tel:077-300-6306" class="contact-button">
+                        <div class="icon-container">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <span class="contact-text">טלפון</span>
+                        <span class="contact-value">077-300-6306</span>
+                    </a>
+                    
+                    <a href="mailto:info@playzone.co.il" class="contact-button">
+                        <div class="icon-container">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <span class="contact-text">אימייל</span>
+                        <span class="contact-value">info@playzone.co.il</span>
+                    </a>
+                    
+                    <a href="https://wa.me/972773006306" class="contact-button">
+                        <div class="icon-container">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <span class="contact-text">וואטסאפ</span>
+                        <span class="contact-value">077-300-6306</span>
+                    </a>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // קבלת פרמטרים מה-URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorType = urlParams.get('type') || 'general';
+            
+            // הצגת הזמן הנוכחי
+            document.getElementById('errorTime').textContent = new Date().toLocaleString();
+            
+            // הצגת קוד השגיאה
+            document.getElementById('errorCode').textContent = errorType;
+            
+            // התאמת הודעת השגיאה לפי סוג השגיאה
+            const errorMessage = document.getElementById('errorMessage');
+            
+            switch (errorType) {
+                case 'missing_fields':
+                    errorMessage.textContent = 'חסרים שדות חובה בטופס. אנא מלאו את כל השדות הנדרשים.';
+                    break;
+                case 'invalid_email':
+                    errorMessage.textContent = 'כתובת האימייל שהוזנה אינה תקינה. אנא בדקו את הכתובת ונסו שוב.';
+                    break;
+                case 'server_error':
+                    errorMessage.textContent = 'אירעה שגיאת שרת. צוות התמיכה שלנו עובד על פתרון הבעיה.';
+                    break;
+                case '404':
+                    errorMessage.textContent = 'הדף המבוקש לא נמצא.';
+                    break;
+                case '403':
+                    errorMessage.textContent = 'אין לך הרשאה לגשת לדף זה.';
+                    break;
+                default:
+                    errorMessage.textContent = 'אירעה שגיאה בעת שליחת הטופס. אנא נסו שוב מאוחר יותר.';
+            }
+        });
+    </script>
+</body>
+</html> 
