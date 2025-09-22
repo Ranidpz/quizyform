@@ -1,121 +1,105 @@
 <?php
-/**
- * Vercel Serverless Function for Quizy Form
- * This handles form submissions and sends emails via Resend API
- */
+// Simple form handler for Vercel
+header('Content-Type: text/html; charset=utf-8');
 
-// Allow CORS
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+// Log the request for debugging
+error_log("Form submission received: " . print_r($_POST, true));
+error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
 
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
-// Only allow POST requests
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
-    exit();
-}
-
-// Resend API configuration
-$resend_api_key = 're_STacfGs3_DaWkfkqzEvQsu2VsSm2kygxV';
-$sender_email = 'Quizy Form <no-reply@playzones.app>';
-$admin_email = 'info@playzone.co.il';
-
-// Get form data
-$data = $_POST;
-
-// Validate required fields
-$required_fields = ['customerName', 'email', 'phone'];
-foreach ($required_fields as $field) {
-    if (empty($data[$field])) {
-        http_response_code(400);
-        echo json_encode(['error' => "Missing required field: $field"]);
+// Check if we have POST data
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
+    
+    // Extract form data
+    $customerName = isset($_POST['customerName']) ? $_POST['customerName'] : '';
+    $email = isset($_POST['email']) ? $_POST['email'] : '';
+    $phone = isset($_POST['phone']) ? $_POST['phone'] : '';
+    $package = isset($_POST['package']) ? $_POST['package'] : '';
+    
+    // Basic validation
+    if (empty($customerName) || empty($email) || empty($phone)) {
+        error_log("Missing required fields");
+        // Redirect to error page or back to form
+        header('Location: /error.html');
         exit();
     }
-}
-
-// Prepare email content
-$customer_name = htmlspecialchars($data['customerName']);
-$email = htmlspecialchars($data['email']);
-$phone = htmlspecialchars($data['phone']);
-$package = htmlspecialchars($data['package'] ?? 'לא נבחר');
-
-// Admin email content
-$admin_subject = 'בקשה חדשה למנוי אחסון - Quizy';
-$admin_body = "
-<div style='direction: rtl; font-family: Arial, sans-serif;'>
-    <h2>התקבלה בקשה חדשה למנוי אחסון</h2>
-    <p><strong>שם הלקוח:</strong> {$customer_name}</p>
-    <p><strong>אימייל:</strong> {$email}</p>
-    <p><strong>טלפון:</strong> {$phone}</p>
-    <p><strong>חבילה:</strong> {$package}</p>
-</div>
-";
-
-// Customer email content
-$customer_subject = 'פרטי הזמנה - מנוי אחסון Quizy';
-$customer_body = "
-<div style='direction: rtl; font-family: Arial, sans-serif;'>
-    <h2>שלום {$customer_name},</h2>
-    <p>תודה על ההרשמה לשירותי האחסון של קוויזי!</p>
-    <p>פרטי ההזמנה שלך:</p>
-    <ul>
-        <li><strong>חבילה:</strong> {$package}</li>
-        <li><strong>אימייל:</strong> {$email}</li>
-    </ul>
-    <p>נחזור אליך בהקדם עם פרטי התשלום.</p>
-</div>
-";
-
-// Send emails via Resend API
-function sendEmail($api_key, $to, $subject, $html, $from) {
-    $ch = curl_init();
     
-    curl_setopt($ch, CURLOPT_URL, 'https://api.resend.com/emails');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $api_key,
-        'Content-Type: application/json'
-    ]);
+    // Resend API configuration
+    $resend_api_key = 're_STacfGs3_DaWkfkqzEvQsu2VsSm2kygxV';
+    $sender_email = 'Quizy Form <no-reply@playzones.app>';
+    $admin_email = 'info@playzone.co.il';
     
-    $payload = json_encode([
-        'from' => $from,
-        'to' => [$to],
-        'subject' => $subject,
-        'html' => $html
-    ]);
+    // Email content
+    $admin_subject = 'בקשה חדשה למנוי אחסון - Quizy';
+    $admin_body = "
+    <div style='direction: rtl; font-family: Arial, sans-serif;'>
+        <h2>התקבלה בקשה חדשה למנוי אחסון</h2>
+        <p><strong>שם הלקוח:</strong> " . htmlspecialchars($customerName) . "</p>
+        <p><strong>אימייל:</strong> " . htmlspecialchars($email) . "</p>
+        <p><strong>טלפון:</strong> " . htmlspecialchars($phone) . "</p>
+        <p><strong>חבילה:</strong> " . htmlspecialchars($package) . "</p>
+    </div>
+    ";
     
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    $customer_subject = 'פרטי הזמנה - מנוי אחסון Quizy';
+    $customer_body = "
+    <div style='direction: rtl; font-family: Arial, sans-serif;'>
+        <h2>שלום " . htmlspecialchars($customerName) . ",</h2>
+        <p>תודה על ההרשמה לשירותי האחסון של קוויזי!</p>
+        <p>פרטי ההזמנה שלך:</p>
+        <ul>
+            <li><strong>חבילה:</strong> " . htmlspecialchars($package) . "</li>
+            <li><strong>אימייל:</strong> " . htmlspecialchars($email) . "</li>
+        </ul>
+        <p>נחזור אליך בהקדם עם פרטי התשלום.</p>
+    </div>
+    ";
     
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    // Function to send email
+    function sendResendEmail($api_key, $to, $subject, $html, $from) {
+        $ch = curl_init();
+        
+        curl_setopt($ch, CURLOPT_URL, 'https://api.resend.com/emails');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $api_key,
+            'Content-Type: application/json'
+        ]);
+        
+        $payload = json_encode([
+            'from' => $from,
+            'to' => [$to],
+            'subject' => $subject,
+            'html' => $html
+        ]);
+        
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        error_log("Email API response to $to: HTTP $httpCode - $response");
+        
+        return $httpCode === 200;
+    }
     
-    return ['code' => $httpCode, 'response' => $response];
-}
-
-// Send admin email
-$admin_result = sendEmail($resend_api_key, $admin_email, $admin_subject, $admin_body, $sender_email);
-
-// Send customer email
-$customer_result = sendEmail($resend_api_key, $email, $customer_subject, $customer_body, $sender_email);
-
-// Check results and respond
-if ($admin_result['code'] === 200 && $customer_result['code'] === 200) {
-    // Success - redirect to thank you page
+    // Try to send emails
+    $admin_sent = sendResendEmail($resend_api_key, $admin_email, $admin_subject, $admin_body, $sender_email);
+    $customer_sent = sendResendEmail($resend_api_key, $email, $customer_subject, $customer_body, $sender_email);
+    
+    // Log results
+    error_log("Admin email sent: " . ($admin_sent ? 'YES' : 'NO'));
+    error_log("Customer email sent: " . ($customer_sent ? 'YES' : 'NO'));
+    
+    // Always redirect to thank you page (even if email fails)
     header('Location: /thank_you.html');
     exit();
+    
 } else {
-    // Error
-    http_response_code(500);
-    echo json_encode(['error' => 'Failed to send emails']);
+    // Not a POST request or no data
+    error_log("Invalid request: Method=" . $_SERVER['REQUEST_METHOD'] . ", POST data empty=" . (empty($_POST) ? 'YES' : 'NO'));
+    header('Location: /');
     exit();
 }
 ?>
