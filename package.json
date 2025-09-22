@@ -4,7 +4,7 @@
   "description": "Quizy Cloud Storage Registration Form",
   "main": "index.html",
   "engines": {
-    "node": "20.x"
+    "node": ">=18.x"
   },
   "scripts": {
     "start": "php -S localhost:8000",
