@@ -1,0 +1,25 @@
+{
+  "name": "quizy-form",
+  "version": "1.0.0",
+  "description": "Quizy Cloud Storage Registration Form",
+  "main": "index.html",
+  "engines": {
+    "node": "20.x"
+  },
+  "scripts": {
+    "start": "php -S localhost:8000",
+    "dev": "php -S localhost:8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ranidpz/quizyform.git"
+  },
+  "keywords": [
+    "form",
+    "php",
+    "quizy",
+    "registration"
+  ],
+  "author": "Quizy",
+  "license": "MIT"
+}
