@@ -1,22 +1,10 @@
 {
-  "version": 2,
   "functions": {
-    "api/**/*.php": {
+    "send-mail.php": {
+      "runtime": "vercel-php@0.7.4"
+    },
+    "approve.php": {
       "runtime": "vercel-php@0.7.4"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/send-mail.php",
-      "destination": "/api/send-mail.php"
-    },
-    {
-      "source": "/approve.php", 
-      "destination": "/api/approve.php"
-    },
-    {
-      "source": "/form-handler.php",
-      "destination": "/api/form-handler.php"
-    }
-  ]
+  }
 }

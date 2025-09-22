@@ -47,18 +47,15 @@
                 <p class="note"><strong>שימו לב:</strong> אם לא קיבלתם אימייל תוך מספר דקות, אנא צרו קשר עם התמיכה בטלפון 077-300-6306 או באימייל info@playzone.co.il</p>
             </div>
             
-            <form id="subscriptionForm" method="post" action="https://formsubmit.co/info@playzone.co.il">
+            <form id="subscriptionForm" method="post" action="send-mail.php">
                 <noscript>
                     <div class="message-container error">
                         <p>הדפדפן שלך לא תומך ב-JavaScript או שהוא מושבת. חלק מהפונקציונליות עלולה להיות מוגבלת.</p>
                     </div>
                 </noscript>
                 
-                <!-- שדות נסתרים עבור FormSubmit -->
-                <input type="hidden" name="_next" value="https://quizyform.vercel.app/thank_you.html">
-                <input type="hidden" name="_subject" value="בקשה חדשה למנוי אחסון - Quizy">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_template" value="table">
+                <!-- הוספת שדה סמוי לציון דף התודה -->
+                <input type="hidden" name="redirect" value="thank_you.html">
                 
                 <div class="section-title">
                     <h3><span class="step-number">1</span> בחירת חבילת אחסון</h3>
