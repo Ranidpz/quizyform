@@ -38,7 +38,7 @@
             <div class="welcome-message">
                 <p>ברוכים הבאים לטופס ההרשמה לשירותי האחסון של קוויזי.</p>
                 <p>לפני שאתם מחליטים איזה חבילה תרצו לרכוש לאחסנת קבצי מדיה בשרת, נסו קודם לנקות את הקבצים שלכם. יתכן ויש לכם קבצים ישנים ולא דרושים. הכנו לכם <a href="https://www.playzone.co.il/post/mymedia" target="_blank" class="guide-link">מדריך לניקוי הקבצים בשרת</a>.</p>
-                <p>אחרי שניקיתם ואתם יודעים איזה חבילה אתם צריכים, אנא מלאו את הפרטים הבאים כדי להירשם לשירות.</p>
+                <p>אחרי שניקיתם ואתם יודעים איזה חבילה אתם צריכים, אנא בחרו את החבילה המתאימה לכם ומלאו את הפרטים כדי להירשם לשירות.</p>
                 <p>לאחר השלמת הטופס תקבלו מייל עם בקשת תשלום מאובטחת. כנסו והקלידו את פרטי האשראי להוראת הקבע ותקבלו הוראות להמשך התהליך.</p>
             </div>
             
@@ -58,66 +58,7 @@
                 <input type="hidden" name="redirect" value="thank_you.html">
                 
                 <div class="section-title">
-                    <h3><span class="step-number">1</span> פרטי לקוח</h3>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="customerName"><span class="required">*</span> שם מלא</label>
-                        <div class="input-with-icon">
-                            <input type="text" id="customerName" name="customerName" required>
-                            <span class="material-icons">person</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="companyName">שם חברה (אם רלוונטי)</label>
-                        <div class="input-with-icon">
-                            <input type="text" id="companyName" name="companyName">
-                            <span class="material-icons">business</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="email"><span class="required">*</span> אימייל</label>
-                        <div class="input-with-icon">
-                            <input type="email" id="email" name="email" required>
-                            <span class="material-icons">email</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="phone"><span class="required">*</span> טלפון</label>
-                        <div class="input-with-icon">
-                            <input type="tel" id="phone" name="phone" required>
-                            <span class="material-icons">phone</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="invoiceName">שם לחשבונית (אם שונה משם הלקוח)</label>
-                        <div class="input-with-icon">
-                            <input type="text" id="invoiceName" name="invoiceName">
-                            <span class="material-icons">receipt</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="installEmail">שם המשתמש במערכת קוויזי גיים</label>
-                        <div class="input-with-icon">
-                            <input type="email" id="installEmail" name="installEmail">
-                            <span class="material-icons">install_desktop</span>
-                        </div>
-                        <small class="form-text">דואל איתו אתם נכנסים למערכת שעליו נתקין את המנוי (אם שונה מהמייל הראשי שמלאתם כאן)</small>
-                    </div>
-                </div>
-                
-                <div class="section-title">
-                    <h3><span class="step-number">2</span> בחירת חבילת אחסון</h3>
+                    <h3><span class="step-number">1</span> בחירת חבילת אחסון</h3>
                 </div>
                 
                 <div class="storage-options">
@@ -188,6 +129,65 @@
                                 <button class="select-package-btn" data-package="ultimate">בחירה</button>
                             </label>
                         </div>
+                    </div>
+                </div>
+                
+                <div class="section-title">
+                    <h3><span class="step-number">2</span> פרטי לקוח</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerName"><span class="required">*</span> שם מלא</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="customerName" name="customerName" required>
+                            <span class="material-icons">person</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="companyName">שם חברה (אם רלוונטי)</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="companyName" name="companyName">
+                            <span class="material-icons">business</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email"><span class="required">*</span> אימייל</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="email" name="email" required>
+                            <span class="material-icons">email</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone"><span class="required">*</span> טלפון</label>
+                        <div class="input-with-icon">
+                            <input type="tel" id="phone" name="phone" required>
+                            <span class="material-icons">phone</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="invoiceName">שם לחשבונית (אם שונה משם הלקוח)</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="invoiceName" name="invoiceName">
+                            <span class="material-icons">receipt</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="installEmail">שם המשתמש במערכת קוויזי גיים</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="installEmail" name="installEmail">
+                            <span class="material-icons">install_desktop</span>
+                        </div>
+                        <small class="form-text">דואל איתו אתם נכנסים למערכת שעליו נתקין את המנוי (אם שונה מהמייל הראשי שמלאתם כאן)</small>
                     </div>
                 </div>
                 
