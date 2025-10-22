@@ -176,6 +176,17 @@ h1::after {
     background-color: var(--accent-color);
 }
 
+.subtitle {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    text-align: right;
+    width: 100%;
+    font-weight: 500;
+    font-style: italic;
+}
+
 .quizy-link {
     color: var(--accent-color);
     text-decoration: none;
