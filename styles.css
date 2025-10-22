@@ -360,6 +360,12 @@ select.error:focus {
         flex: 1 0 calc(25% - 3px);
         max-width: calc(25% - 3px);
     }
+
+    /* For pricing page with 2 packages */
+    .storage-options-row.two-packages .storage-option {
+        flex: 1 0 calc(50% - 4px);
+        max-width: calc(50% - 4px);
+    }
 }
 
 .storage-option.ultimate {
