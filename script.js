@@ -134,16 +134,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const packageParam = urlParams.get('package');
 
         if (packageParam) {
-            // Pre-select package from URL parameter
-            const packageRadio = document.getElementById(packageParam);
-            if (packageRadio) {
-                // Trigger the package selection
-                const packageButton = document.querySelector(`.select-package-btn[data-package="${packageParam}"]`);
-                if (packageButton) {
-                    packageButton.click();
-                    console.log(`חבילה נבחרה מהלינק: ${packageParam}`);
+            // Pre-select package from URL parameter with a small delay to ensure DOM is ready
+            setTimeout(() => {
+                const packageRadio = document.getElementById(packageParam);
+                if (packageRadio) {
+                    // Trigger the package selection
+                    const packageButton = document.querySelector(`.select-package-btn[data-package="${packageParam}"]`);
+                    if (packageButton) {
+                        console.log(`מנסה לבחור חבילה מהלינק: ${packageParam}`);
+                        packageButton.click();
+                    } else {
+                        console.error(`לא נמצא כפתור לחבילה: ${packageParam}`);
+                    }
+                } else {
+                    console.error(`לא נמצא radio button לחבילה: ${packageParam}`);
                 }
-            }
+            }, 100);
         } else {
             // Set premium package as default (only for cloud storage page)
             const premiumRadio = document.getElementById('premium');
