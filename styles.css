@@ -55,7 +55,7 @@ body {
     margin: 0 auto;
     padding: 0 15px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     gap: 15px;
 }
@@ -71,9 +71,15 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-family: 'Assistant', sans-serif;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-btn i {
+    font-size: 1.2rem;
 }
 
 .nav-btn:hover {
