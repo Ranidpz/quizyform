@@ -210,7 +210,7 @@ function buildAdminEmailContent($form_data) {
     // הוספת כפתור אישור ללקוח
     $order_id = $form_data['order_id'];
     $customer_email = $form_data['email'];
-    $approve_url = "https://playzones.app/quizy_form/approve.php?order_id={$order_id}&email={$customer_email}";
+    $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email={$customer_email}";
 
     // מידע על החבילה
     $package_info = [
