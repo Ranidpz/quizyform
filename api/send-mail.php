@@ -211,7 +211,29 @@ function buildAdminEmailContent($form_data) {
     $order_id = $form_data['order_id'];
     $customer_email = $form_data['email'];
     $approve_url = "https://playzones.app/quizy_form/approve.php?order_id={$order_id}&email={$customer_email}";
-    
+
+    // מידע על החבילה
+    $package_info = [
+        'basic' => ['name' => 'בסיסי', 'size' => '2GB', 'price' => '35 ₪', 'type' => 'אחסון בענן'],
+        'standard' => ['name' => 'מתקדם', 'size' => '5GB', 'price' => '71 ₪', 'type' => 'אחסון בענן'],
+        'premium' => ['name' => 'פרימיום', 'size' => '10GB', 'price' => '118 ₪', 'type' => 'אחסון בענן'],
+        'pro' => ['name' => 'פרו', 'size' => '15GB', 'price' => '159 ₪', 'type' => 'אחסון בענן'],
+        'ultimate' => ['name' => 'אולטימייט', 'size' => '20GB', 'price' => '189 ₪', 'type' => 'אחסון בענן'],
+        'pro60' => ['name' => 'PRO60', 'size' => '60 שחקנים + 1GB בענן', 'price' => '217 ₪', 'type' => 'שעשועונים און ליין'],
+        'pro300' => ['name' => 'PRO300', 'size' => '300 שחקנים + 2GB בענן', 'price' => '550 ₪', 'type' => 'שעשועונים און ליין']
+    ];
+
+    $package = isset($form_data['package']) ? $form_data['package'] : 'premium';
+    $package_details = isset($package_info[$package]) ? $package_info[$package] : $package_info['premium'];
+
+    // הסכמה לרשימת דיוור
+    $newsletter_consent = isset($form_data['newsletter']) && $form_data['newsletter'] == '1' ? 'כן' : 'לא';
+
+    // קבלת IP ותאריך
+    $user_ip = $_SERVER['REMOTE_ADDR'] ?? 'לא זמין';
+    $submission_date = date('d/m/Y');
+    $submission_time = date('H:i:s');
+
     $html = '
     <html>
     <head>
@@ -229,6 +251,17 @@ function buildAdminEmailContent($form_data) {
                 border-bottom: 1px solid #eee;
                 padding-bottom: 10px;
             }
+            .package-summary {
+                background-color: #e3f2fd;
+                border: 2px solid #0078d4;
+                border-radius: 5px;
+                padding: 15px;
+                margin: 20px 0;
+            }
+            .package-summary h3 {
+                color: #0078d4;
+                margin-top: 0;
+            }
             table {
                 width: 100%;
                 border-collapse: collapse;
@@ -237,6 +270,7 @@ function buildAdminEmailContent($form_data) {
             th, td {
                 border: 1px solid #ddd;
                 padding: 10px;
+                text-align: right;
             }
             th {
                 background-color: #f5f5f5;
@@ -259,43 +293,90 @@ function buildAdminEmailContent($form_data) {
                 border: 1px solid #ffeb3b;
                 margin: 20px 0;
             }
+            .newsletter-yes {
+                color: #4CAF50;
+                font-weight: bold;
+            }
+            .newsletter-no {
+                color: #999;
+            }
         </style>
     </head>
     <body>
-        <h2>בקשה חדשה למנוי אחסנת קבצים</h2>
-        <p>התקבלה בקשה חדשה למנוי אחסנת קבצים:</p>
+        <h2>בקשה חדשה למנוי - ' . htmlspecialchars($package_details['type']) . '</h2>
+
+        <div class="package-summary">
+            <h3>פרטי החבילה שנרכשה:</h3>
+            <p><strong>סוג מנוי:</strong> ' . htmlspecialchars($package_details['type']) . '</p>
+            <p><strong>שם חבילה:</strong> ' . htmlspecialchars($package_details['name']) . '</p>
+            <p><strong>היקף:</strong> ' . htmlspecialchars($package_details['size']) . '</p>
+            <p><strong>מחיר חודשי:</strong> ' . htmlspecialchars($package_details['price']) . '</p>
+        </div>
+
+        <h3>פרטי הלקוח:</h3>
         <table>
             <tr>
                 <th>שדה</th>
                 <th>ערך</th>
-            </tr>';
-    
-    // הוספת כל השדות מהטופס
-    foreach ($form_data as $key => $value) {
-        if ($key !== 'submit' && $key !== 'redirect' && $key !== 'csrf_token') {
-            $html .= '
+            </tr>
             <tr>
-                <td><strong>' . htmlspecialchars($key) . '</strong></td>
-                <td>' . htmlspecialchars($value) . '</td>
-            </tr>';
-        }
-    }
-    
-    $html .= '
+                <td><strong>שם מלא</strong></td>
+                <td>' . htmlspecialchars($form_data['customerName'] ?? '') . '</td>
+            </tr>
+            <tr>
+                <td><strong>שם חברה</strong></td>
+                <td>' . htmlspecialchars($form_data['companyName'] ?? 'לא צוין') . '</td>
+            </tr>
+            <tr>
+                <td><strong>אימייל</strong></td>
+                <td>' . htmlspecialchars($form_data['email'] ?? '') . '</td>
+            </tr>
+            <tr>
+                <td><strong>טלפון</strong></td>
+                <td>' . htmlspecialchars($form_data['phone'] ?? '') . '</td>
+            </tr>
+            <tr>
+                <td><strong>שם לחשבונית</strong></td>
+                <td>' . htmlspecialchars($form_data['invoiceName'] ?? 'לא צוין') . '</td>
+            </tr>
+            <tr>
+                <td><strong>אימייל להתקנה</strong></td>
+                <td>' . htmlspecialchars($form_data['installEmail'] ?? 'לא צוין') . '</td>
+            </tr>
+            <tr>
+                <td><strong>מזהה הזמנה</strong></td>
+                <td>' . htmlspecialchars($order_id) . '</td>
+            </tr>
         </table>
-        
+
+        <h3>הסכמה לרשימת דיוור:</h3>
+        <p class="' . ($newsletter_consent === 'כן' ? 'newsletter-yes' : 'newsletter-no') . '">
+            <strong>הסכים להצטרף לרשימת הדיוור:</strong> ' . $newsletter_consent . '
+        </p>
+        ' . ($newsletter_consent === 'כן' ? '
+        <div style="background-color: #e8f5e9; padding: 10px; border-radius: 5px; margin: 10px 0;">
+            <p><strong>פרטי אישור:</strong></p>
+            <p>📅 תאריך: ' . $submission_date . '</p>
+            <p>🕐 שעה: ' . $submission_time . '</p>
+            <p>🌐 IP: ' . htmlspecialchars($user_ip) . '</p>
+            <p style="font-size: 12px; color: #666;">ניתן להוסיף לקוח זה לרשימת הדיוור במערכת</p>
+        </div>
+        ' : '<p style="font-size: 12px; color: #666;">הלקוח לא ביקש להצטרף לרשימת הדיוור</p>') . '
+
         <div class="highlight">
             <p><strong>פעולות נדרשות:</strong></p>
             <p>1. יש לוודא שהלקוח ביצע תשלום</p>
             <p>2. לאחר אישור התשלום, יש ללחוץ על הכפתור הבא לשליחת אישור ללקוח:</p>
         </div>
-        
+
         <a href="' . $approve_url . '" class="button">אשר ללקוח שהמנוי פעיל</a>
-        
-        <p>נשלח מטופס האחסון באתר קוויזי בתאריך: ' . date('d/m/Y H:i:s') . '</p>
+
+        <p style="font-size: 12px; color: #666; margin-top: 30px;">
+            נשלח מטופס קוויזי בתאריך: ' . $submission_date . ' בשעה: ' . $submission_time . '
+        </p>
     </body>
     </html>';
-    
+
     return $html;
 }
 
