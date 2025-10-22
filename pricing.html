@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>טופס הרשמה למנוי שנתי | Quizy Online Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=20250703093501">
+    <script>
+        // סקריפט לטיפול בשגיאות 404 בקונסול
+        window.addEventListener('error', function(e) {
+            // בודק אם השגיאה היא מסוג 404 על קבצי PHP
+            if (e.target && e.target.tagName === 'SCRIPT' &&
+                (e.target.src.includes('form-handler.php') || e.target.src.includes('send-mail.php'))) {
+                console.log('מתעלם משגיאת טעינת קובץ PHP:', e.target.src);
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="logo-container">
+                    <a href="https://playzone.co.il" target="_blank">
+                        <img src="media/logo.png" alt="Quizy Logo" class="logo">
+                    </a>
+                </div>
+                <h1>טופס הרשמה למנוי שנתי <span class="quizy-link">קוויזי גיים</span></h1>
+            </div>
+
+            <div class="welcome-message">
+                <p>ברוכים הבאים לטופס ההרשמה למנוי השנתי של קוויזי גיים.</p>
+                <p>המנויים השנתיים כוללים הפקת שעשועונים און ליין לטלפונים ללא אפשרות להורדה אל שולחן העבודה.</p>
+                <p>אנא בחרו את החבילה המתאימה לכם ומלאו את הפרטים כדי להירשם לשירות.</p>
+                <p>לאחר השלמת הטופס תקבלו מייל עם בקשת תשלום מאובטחת. כנסו והקלידו את פרטי האשראי להוראת הקבע ותקבלו הוראות להמשך התהליך.</p>
+            </div>
+
+            <div class="process-info">
+                <p>לאחר מילוי הטופס, תקבלו הודעת אימייל עם הנחיות להמשך התהליך ופרטי תשלום.</p>
+                <p class="note"><strong>שימו לב:</strong> אם לא קיבלתם אימייל תוך מספר דקות, אנא צרו קשר עם התמיכה בטלפון 077-300-6306 או באימייל info@playzone.co.il</p>
+            </div>
+
+            <form id="subscriptionForm" method="post" action="send-mail.php">
+                <noscript>
+                    <div class="message-container error">
+                        <p>הדפדפן שלך לא תומך ב-JavaScript או שהוא מושבת. חלק מהפונקציונליות עלולה להיות מוגבלת.</p>
+                    </div>
+                </noscript>
+
+                <!-- הוספת שדה סמוי לציון דף התודה -->
+                <input type="hidden" name="redirect" value="thank_you.html">
+
+                <div class="section-title">
+                    <h3><span class="step-number">1</span> בחירת חבילת מנוי שנתי</h3>
+                </div>
+
+                <div class="storage-options">
+                    <div class="storage-options-row">
+                        <div class="storage-option">
+                            <input type="radio" id="pro60" name="package" value="pro60" data-size="60 שחקנים" data-price="217">
+                            <label class="package-label" for="pro60">
+                                <div class="package-details">
+                                    <span class="package-name">PRO60</span>
+                                    <span class="package-size">עד 60 שחקנים</span>
+                                    <span class="package-price">217 ₪ / חודש</span>
+                                    <span class="package-desc">יחד בסלולר</span>
+                                </div>
+                                <button class="select-package-btn" data-package="pro60">בחירה</button>
+                            </label>
+                        </div>
+
+                        <div class="storage-option">
+                            <input type="radio" id="pro300" name="package" value="pro300" data-size="300 שחקנים" data-price="550">
+                            <label class="package-label" for="pro300">
+                                <div class="package-details">
+                                    <span class="package-name">PRO300</span>
+                                    <span class="package-size">עד 300 שחקנים</span>
+                                    <span class="package-price">550 ₪ / חודש</span>
+                                    <span class="package-desc">יחד בסלולר</span>
+                                </div>
+                                <button class="select-package-btn" data-package="pro300">בחירה</button>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <h3><span class="step-number">2</span> פרטי לקוח</h3>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerName"><span class="required">*</span> שם מלא</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="customerName" name="customerName" required>
+                            <span class="material-icons">person</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyName">שם חברה (אם רלוונטי)</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="companyName" name="companyName">
+                            <span class="material-icons">business</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email"><span class="required">*</span> אימייל</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="email" name="email" required>
+                            <span class="material-icons">email</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone"><span class="required">*</span> טלפון</label>
+                        <div class="input-with-icon">
+                            <input type="tel" id="phone" name="phone" required>
+                            <span class="material-icons">phone</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="invoiceName">שם לחשבונית (אם שונה משם הלקוח)</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="invoiceName" name="invoiceName">
+                            <span class="material-icons">receipt</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="installEmail">שם המשתמש במערכת קוויזי גיים</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="installEmail" name="installEmail">
+                            <span class="material-icons">install_desktop</span>
+                        </div>
+                        <small class="form-text">דואל איתו אתם נכנסים למערכת שעליו נתקין את המנוי (אם שונה מהמייל הראשי שמלאתם כאן)</small>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <h3><span class="step-number">3</span> תנאי שימוש</h3>
+                </div>
+
+                <div class="terms-box">
+                    <p>השירות הינו בהוראת קבע לשנה ומתחדש באופן אוטומטי אלא אם בחרתם אחרת.</p>
+                    <p>המנוי השנתי כולל הפקת שעשועונים און ליין לטלפונים ללא אפשרות להורדה אל שולחן העבודה.</p>
+                    <p>ניתן לשנות את החבילה במהלך תקופת השירות. כל ביטול או שינוי בחבילה נעשה חודש מראש ובכתב למייל שלנו ואישור במייל כי הבקשה נקלטה.</p>
+                    <p>במידה ולא קיבלתם מייל שמאשר שקיבלנו את שינוי או ביטול החבילה, באחריותכם ליצור איתנו קשר.</p>
+                    <p>ביטול חבילה או שינוי יעשה ממחזור החיוב הבא.</p>
+                    <p>לקריאת <a href="https://quizy.co.il/terms" target="_blank" class="terms-link">תנאי השימוש המלאים</a>.</p>
+                </div>
+
+                <!-- הודעת אבטחה -->
+                <div class="security-message">
+                    <span class="material-icons">security</span>
+                    <p>כל הפרטים שתזינו בטופס זה מאובטחים ומוגנים. הטופס מוצפן בתקן SSL ומועבר בצורה מאובטחת.</p>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="agree" name="agree" value="1">
+                    <label for="agree">אני מאשר/ת כי קראתי את תנאי השימוש והפרטיות ומסכים/ה להם. אני מאשר/ת קבלת חשבוניות מס/קבלה בדוא"ל.</label>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" id="submitBtn" class="submit-button">שליחת הטופס</button>
+                </div>
+
+                <!-- הודעות שגיאה והצלחה -->
+                <div id="messageContainer" class="message-container"></div>
+            </form>
+
+            <!-- טופס גיבוי למקרה של כשל בשליחה -->
+            <form id="fallbackForm" action="direct-submit.php" method="post" style="display: none;">
+                <input type="hidden" name="customerName" id="fallback_customerName">
+                <input type="hidden" name="companyName" id="fallback_companyName">
+                <input type="hidden" name="email" id="fallback_email">
+                <input type="hidden" name="phone" id="fallback_phone">
+                <input type="hidden" name="invoiceName" id="fallback_invoiceName">
+                <input type="hidden" name="installEmail" id="fallback_installEmail">
+                <input type="hidden" name="package" id="fallback_package">
+                <input type="hidden" name="termsAgree" id="fallback_termsAgree" value="1">
+                <input type="hidden" name="fallback_submission" value="true">
+                <button type="submit" id="fallbackSubmitBtn">שליחה</button>
+            </form>
+        </div>
+
+        <footer>
+            <div class="contact-title">
+                <h4>צריכים עזרה?</h4>
+                <p>צוות התמיכה שלנו זמין לכל שאלה</p>
+            </div>
+
+            <div class="contact-buttons">
+                <a href="tel:077-300-6306" class="contact-button">
+                    <div class="icon-container">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <span class="contact-text">טלפון</span>
+                    <span class="contact-value">077-300-6306</span>
+                </a>
+
+                <a href="mailto:info@playzone.co.il" class="contact-button">
+                    <div class="icon-container">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <span class="contact-text">אימייל</span>
+                    <span class="contact-value">info@playzone.co.il</span>
+                </a>
+
+                <a href="https://wa.me/972773006306" class="contact-button">
+                    <div class="icon-container">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <span class="contact-text">וואטסאפ</span>
+                    <span class="contact-value">077-300-6306</span>
+                </a>
+            </div>
+
+            <div class="security-badge">
+                <span>כל המידע מאובטח ומוגן</span>
+                <span class="material-icons">lock</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- אלמנט הטעינה -->
+    <div id="loadingOverlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- סקריפט פשוט לטיפול בטופס -->
+    <script src="script.js?v=20250703094001"></script>
+</body>
+</html>
