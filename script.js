@@ -99,6 +99,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             console.log(`נבחרה חבילה: ${packageId}`);
+
+            // Show and update features section
+            showFeaturesSection(packageId);
         });
     });
     
@@ -512,5 +515,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // פונקציה להצגת הודעות שגיאה
     function showError(message) {
         showMessage(message, 'error');
+    }
+
+    /**
+     * Show and update features section based on selected package
+     * @param {string} packageId - ID of the selected package (pro60 or pro300)
+     */
+    function showFeaturesSection(packageId) {
+        const featuresSection = document.getElementById('featuresSection');
+        if (!featuresSection) return;
+
+        // Update dynamic content based on package
+        const playersCount = document.getElementById('playersCount');
+        const cloudStorage = document.getElementById('cloudStorage');
+
+        if (packageId === 'pro60') {
+            if (playersCount) playersCount.textContent = 'עד 60 שחקנים בכל אירוע';
+            if (cloudStorage) cloudStorage.textContent = '1GB';
+        } else if (packageId === 'pro300') {
+            if (playersCount) playersCount.textContent = 'עד 300 שחקנים בכל אירוע';
+            if (cloudStorage) cloudStorage.textContent = '2GB';
+        }
+
+        // Show features section with fade-in animation
+        featuresSection.style.display = 'block';
+        featuresSection.style.opacity = '0';
+        featuresSection.style.transition = 'opacity 0.5s ease-in-out';
+
+        setTimeout(() => {
+            featuresSection.style.opacity = '1';
+            // Scroll to features section smoothly
+            setTimeout(() => {
+                featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
+        }, 100);
+
+        console.log(`מציג חלק תכונות עבור חבילה: ${packageId}`);
     }
 }); 

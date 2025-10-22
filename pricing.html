@@ -84,7 +84,6 @@
                                     <span class="package-name">PRO60</span>
                                     <span class="package-size">עד 60 שחקנים</span>
                                     <span class="package-price">217 ₪ / חודש</span>
-                                    <span class="package-desc">יחד בסלולר</span>
                                 </div>
                                 <button class="select-package-btn" data-package="pro60">בחירה</button>
                             </label>
@@ -97,7 +96,6 @@
                                     <span class="package-name">PRO300</span>
                                     <span class="package-size">עד 300 שחקנים</span>
                                     <span class="package-price">550 ₪ / חודש</span>
-                                    <span class="package-desc">יחד בסלולר</span>
                                 </div>
                                 <button class="select-package-btn" data-package="pro300">בחירה</button>
                             </label>
@@ -106,14 +104,14 @@
                 </div>
 
                 <!-- Features Section -->
-                <div class="features-section">
+                <div class="features-section" id="featuresSection" style="display: none;">
                     <h3 class="features-title">✨ מה כולל המנוי להפקת שעשועונים און ליין?</h3>
 
                     <div class="features-grid">
                         <div class="feature-item">
                             <i class="fas fa-users"></i>
                             <div class="feature-content">
-                                <strong>עד 60/300 שחקנים בכל אירוע</strong>
+                                <strong id="playersCount">עד 60 שחקנים בכל אירוע</strong>
                                 <span class="feature-note">בשעשועון און ליין בלבד!</span>
                             </div>
                         </div>
@@ -188,7 +186,7 @@
                         <h4>💡 תמיכה ושירותים נוספים:</h4>
                         <ul class="features-list">
                             <li><i class="fas fa-graduation-cap"></i> הדרכה מלאה בתמיכה מרחוק</li>
-                            <li><i class="fas fa-cloud"></i> 2GB אחסון בענן למדיה בכל תקופת השירות</li>
+                            <li><i class="fas fa-cloud"></i> <span id="cloudStorage">1GB</span> אחסון בענן למדיה בכל תקופת השירות</li>
                             <li><i class="fas fa-headset"></i> תמיכה טכנית בזמינות של עד 48 שעות SLA</li>
                             <li><i class="fas fa-user"></i> להפעלה ממשתמש אחד און ליין (באתר בלבד)</li>
                         </ul>
@@ -259,12 +257,56 @@
                 </div>
 
                 <div class="terms-box">
-                    <p>השירות הינו בהוראת קבע לשנה ומתחדש באופן אוטומטי אלא אם בחרתם אחרת.</p>
-                    <p>המנוי השנתי כולל הפקת שעשועונים און ליין לטלפונים ללא אפשרות להורדה אל שולחן העבודה.</p>
-                    <p>ניתן לשנות את החבילה במהלך תקופת השירות. כל ביטול או שינוי בחבילה נעשה חודש מראש ובכתב למייל שלנו ואישור במייל כי הבקשה נקלטה.</p>
-                    <p>במידה ולא קיבלתם מייל שמאשר שקיבלנו את שינוי או ביטול החבילה, באחריותכם ליצור איתנו קשר.</p>
-                    <p>ביטול חבילה או שינוי יעשה ממחזור החיוב הבא.</p>
-                    <p>לקריאת <a href="https://quizy.co.il/terms" target="_blank" class="terms-link">תנאי השימוש המלאים</a>.</p>
+                    <h4>שירות תוכנה און ליין בהוראת קבע</h4>
+                    <p>השירות ניתן בהוראת קבע לתקופה של שנה ומתחדש באופן אוטומטי אלא אם בחרתם אחרת.</p>
+
+                    <h4>תוכן המנוי השנתי</h4>
+                    <p><strong>הפקת שעשועונים</strong></p>
+                    <ul>
+                        <li>הפקת שעשועונים און ליין לטלפונים בלבד (ללא אפשרות להורדה לשולחן העבודה)</li>
+                        <li>הפעלת שעשועון אחד בכל פעם, בהתאם למספר השחקנים הנבחר במנוי</li>
+                    </ul>
+
+                    <p><strong>אחסון בענן</strong></p>
+                    <p>אחסון בענן תלוי בחבילה שתבחרו:</p>
+                    <ul>
+                        <li>עד 60 שחקנים → 1 ג"ב</li>
+                        <li>עד 300 שחקנים → 2 ג"ב</li>
+                    </ul>
+                    <p>האחסון לא יימחק במהלך כל תקופת השירות (<a href="https://www.playzone.co.il/post/mymedia" target="_blank" class="terms-link">לפרטים נוספים</a>)</p>
+
+                    <p><strong>חיוב וחשבוניות</strong></p>
+                    <ul>
+                        <li>השירות יחויב חודש בחודשו באופן אוטומטי</li>
+                        <li>חשבונית נשלחת אוטומטית בכל חודש לאחר החיוב, למייל ההרשמה</li>
+                    </ul>
+
+                    <h4>שינוי או ביטול</h4>
+                    <ul>
+                        <li>ניתן לשנות את החבילה במהלך תקופת השירות</li>
+                        <li>כל ביטול או שינוי חבילה דורש הודעה בכתב, חודש מראש למייל שלנו</li>
+                        <li>יש צורך בקבלת אישור בחזרה שהבקשה נקלטה</li>
+                        <li>אם לא קיבלתם אישור, באחריותכם ליצור איתנו קשר</li>
+                        <li>ביטול או שינוי יכנסו לתוקף החל מהמחזור הבא</li>
+                    </ul>
+
+                    <h4>הורדה לשולחן העבודה</h4>
+                    <p>להורדת שעשועונים לשולחן העבודה, ניתן לרכוש:</p>
+                    <ul>
+                        <li>שעשועון בודד, או</li>
+                        <li>חבילת שעשועונים עם לינק למדריך: <a href="https://www.playzone.co.il/post/prouser" target="_blank" class="terms-link">https://www.playzone.co.il/post/prouser</a></li>
+                    </ul>
+
+                    <h4>תנאים חוקיים ברישום</h4>
+                    <p>ההרשמה כוללת ובו בזמן דורשת אישור של:</p>
+                    <ul>
+                        <li>תקנון האתר</li>
+                        <li>פרטי השימוש</li>
+                        <li>מדיניות הפרטיות</li>
+                    </ul>
+                    <p>(כל אלה זמינים בכתובת: quziygame.com)</p>
+
+                    <p>לקריאת <a href="https://quizy.co.il/terms" target="_blank" class="terms-link">תנאי השימוש המלאים</a>, אנא בקרו בעמוד התנאים באתר.</p>
                 </div>
 
                 <!-- הודעת אבטחה -->
