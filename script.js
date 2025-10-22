@@ -100,6 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log(`נבחרה חבילה: ${packageId}`);
 
+            // Update URL with package parameter
+            updateURLWithPackage(packageId);
+
             // Show and update features section
             showFeaturesSection(packageId);
         });
@@ -532,6 +535,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // פונקציה להצגת הודעות שגיאה
     function showError(message) {
         showMessage(message, 'error');
+    }
+
+    /**
+     * Update URL with package parameter without reloading the page
+     * @param {string} packageId - ID of the selected package
+     */
+    function updateURLWithPackage(packageId) {
+        const url = new URL(window.location);
+        url.searchParams.set('package', packageId);
+        window.history.pushState({}, '', url);
+        console.log(`עדכון URL: ${url}`);
     }
 
     /**
