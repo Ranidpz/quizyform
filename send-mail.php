@@ -331,7 +331,32 @@ function buildCustomerEmailContent($form_data) {
     $package_name = isset($package_info[$package]) ? $package_info[$package]['name'] : 'פרימיום';
     $package_size = isset($package_info[$package]) ? $package_info[$package]['size'] : '10GB';
     $package_price = isset($package_info[$package]) ? $package_info[$package]['price'] : '118 ₪';
-    
+
+    // בדיקה אם זה מנוי PRO (שעשועונים) או Cloud (אחסון)
+    $is_pro_package = ($package === 'pro60' || $package === 'pro300');
+
+    // הגדרת כותרת וטקסט בהתאם לסוג החבילה
+    if ($is_pro_package) {
+        $service_title = 'תודה על הרשמתכם כמנויים להפקת שעשועונים און ליין!';
+        $service_description = 'תודה שבחרתם בשירות המנויים של קוויזי להפקת שעשועונים און ליין. פרטי ההרשמה שלכם התקבלו בהצלחה.';
+
+        // הוספת נפח אחסון בענן למנויי PRO
+        if ($package === 'pro60') {
+            $cloud_storage = '1GB';
+            $players_count = 'עד 60 סלולרים';
+        } else {
+            $cloud_storage = '2GB';
+            $players_count = 'עד 300 סלולרים';
+        }
+        $storage_text = '<p><strong>נפח אחסון בענן:</strong> ' . $cloud_storage . '</p>';
+        $description_text = '<p><strong>תיאור המנוי:</strong> מנוי להפעלת משחקים און ליין עם ' . $players_count . ' בכל משחק</p>';
+    } else {
+        $service_title = 'תודה על הרשמתכם לשירות אחסון קבצי מדיה בענן של קוויזי!';
+        $service_description = 'תודה שבחרתם בשירותי האחסון של קוויזי. פרטי ההרשמה שלכם התקבלו בהצלחה.';
+        $storage_text = '<p><strong>נפח אחסון:</strong> ' . $package_size . '</p>';
+        $description_text = '';
+    }
+
     $html = '
     <html>
     <head>
@@ -394,36 +419,37 @@ function buildCustomerEmailContent($form_data) {
         </style>
     </head>
     <body>
-        <h2>תודה על הרשמתך לשירות אחסון קבצים של קוויזי!</h2>
-        
+        <h2>' . $service_title . '</h2>
+
         <p>שלום ' . htmlspecialchars($form_data['customerName']) . ',</p>
-        
-        <p>תודה שבחרת בשירותי האחסון של קוויזי. פרטי ההרשמה שלך התקבלו בהצלחה.</p>
-        
+
+        <p>' . $service_description . '</p>
+
         <div class="package-info">
             <div class="package-name">חבילת ' . $package_name . ' - ' . $package_size . '</div>
             <div class="package-details">
                 <p><strong>מחיר חודשי:</strong> ' . $package_price . '</p>
-                <p><strong>נפח אחסון:</strong> ' . $package_size . '</p>
+                ' . $storage_text . '
+                ' . $description_text . '
             </div>
         </div>
-        
+
         <p><strong>השלב הבא:</strong> לצורך הפעלת המנוי, יש לבצע תשלום באמצעות הקישור הבא:</p>
-        
-        <a href="' . $payment_link . '" class="button">לחץ כאן לתשלום</a>
-        
+
+        <a href="' . $payment_link . '" class="button">לחצו כאן לתשלום</a>
+
         <div class="note">
-            <p><strong>שים לב:</strong> לאחר ביצוע התשלום, המנוי יופעל תוך 24 שעות ותקבל מייל אישור נוסף.</p>
+            <p><strong>שימו לב:</strong> לאחר ביצוע התשלום, המנוי יופעל תוך 24 שעות ותקבלו מייל אישור נוסף.</p>
         </div>
-        
-        <p>אם יש לך שאלות כלשהן או שאתה זקוק לעזרה, אנחנו כאן בשבילך!</p>
-        
+
+        <p>אם יש לכם שאלות כלשהן או שאתם זקוקים לעזרה, אנחנו כאן בשבילכם!</p>
+
         <a href="https://quizygame.com" class="button">לתמיכה טכנית</a>
-        
+
         <div class="footer">
             <p>בברכה,<br>צוות קוויזי</p>
             <p>טלפון: 077-300-6306<br>אימייל: info@playzone.co.il</p>
-            <p style="color: #ff0000; font-size: 12px;">שים לב: זהו מייל אוטומטי ולא ניתן להשיב אליו. לכל שאלה או בקשה, אנא פנה אלינו בכתובת info@playzone.co.il</p>
+            <p style="color: #ff0000; font-size: 12px;">שימו לב: זהו מייל אוטומטי ולא ניתן להשיב אליו. לכל שאלה או בקשה, אנא פנו אלינו בכתובת info@playzone.co.il</p>
         </div>
     </body>
     </html>';
