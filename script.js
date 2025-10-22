@@ -125,27 +125,44 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function initializeForm() {
         console.log("מאתחל את הטופס...");
-        
-        // Set premium package as default
-        const premiumRadio = document.getElementById('premium');
-        if (premiumRadio) {
-            premiumRadio.checked = true;
-            const premiumOption = premiumRadio.closest('.storage-option');
-            if (premiumOption) {
-                premiumOption.classList.add('active');
+
+        // Check if there's a package parameter in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const packageParam = urlParams.get('package');
+
+        if (packageParam) {
+            // Pre-select package from URL parameter
+            const packageRadio = document.getElementById(packageParam);
+            if (packageRadio) {
+                // Trigger the package selection
+                const packageButton = document.querySelector(`.select-package-btn[data-package="${packageParam}"]`);
+                if (packageButton) {
+                    packageButton.click();
+                    console.log(`חבילה נבחרה מהלינק: ${packageParam}`);
+                }
             }
-            
-            // Update the premium button
-            const premiumButton = document.querySelector('.select-package-btn[data-package="premium"]');
-            if (premiumButton) {
-                premiumButton.classList.add('selected');
-                premiumButton.textContent = 'נבחר';
+        } else {
+            // Set premium package as default (only for cloud storage page)
+            const premiumRadio = document.getElementById('premium');
+            if (premiumRadio) {
+                premiumRadio.checked = true;
+                const premiumOption = premiumRadio.closest('.storage-option');
+                if (premiumOption) {
+                    premiumOption.classList.add('active');
+                }
+
+                // Update the premium button
+                const premiumButton = document.querySelector('.select-package-btn[data-package="premium"]');
+                if (premiumButton) {
+                    premiumButton.classList.add('selected');
+                    premiumButton.textContent = 'נבחר';
+                }
+
+                // Set packageSelected to true since we have a default selection
+                packageSelected = true;
+
+                console.log("חבילת פרימיום נבחרה כברירת מחדל");
             }
-            
-            // Set packageSelected to true since we have a default selection
-            packageSelected = true;
-            
-            console.log("חבילת פרימיום נבחרה כברירת מחדל");
         }
         
         // עדכון ערכי המחירים עם מע"מ של 18%
