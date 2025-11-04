@@ -27,15 +27,35 @@ $log_file = __DIR__ . '/form_submissions.log';
 // בדיקת פרמטרים
 $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : '';
 $customer_email = isset($_GET['email']) ? $_GET['email'] : '';
+$installation_email = isset($_GET['install_email']) ? $_GET['install_email'] : '';
 
 // רישום לוג של הבקשה
-$log_data = date('Y-m-d H:i:s') . ' - בקשת אישור מנוי: ' . $order_id . ' עבור ' . $customer_email . "\n";
+$log_data = date('Y-m-d H:i:s') . ' - בקשת אישור מנוי: ' . $order_id . ' עבור ' . $customer_email;
+if (!empty($installation_email)) {
+    $log_data .= ' (אימייל להתקנה: ' . $installation_email . ')';
+}
+$log_data .= "\n";
 file_put_contents($log_file, $log_data, FILE_APPEND);
 
 // בדיקת תקינות הפרמטרים
 if (empty($order_id) || empty($customer_email) || !filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
     showErrorPage('פרמטרים חסרים או לא תקינים');
     exit;
+}
+
+// הכנת רשימת נמענים - כולל המייל הראשי, מייל להתקנה אם קיים, והמנהל
+$recipients = [$customer_email];
+
+// הוספת מייל להתקנה אם קיים ושונה מהמייל הראשי
+if (!empty($installation_email) && filter_var($installation_email, FILTER_VALIDATE_EMAIL)) {
+    if ($installation_email !== $customer_email) {
+        $recipients[] = $installation_email;
+    }
+}
+
+// הוספת המנהל לרשימת הנמענים (תמיד מקבל העתק)
+if (!in_array($admin_email, $recipients)) {
+    $recipients[] = $admin_email;
 }
 
 // בניית תוכן המייל ללקוח
@@ -49,11 +69,12 @@ if (!is_dir($debug_dir)) {
 $debug_file = $debug_dir . '/' . time() . '_confirmation_email.html';
 file_put_contents($debug_file, $confirmation_html);
 
-// שליחת המייל ללקוח
-$result = sendEmailWithResend($resend_api_key, $confirmation_html, $customer_email, $confirmation_subject);
+// שליחת המייל לכל הנמענים (כולל המנהל)
+$recipients_str = implode(', ', $recipients);
+$result = sendEmailToMultipleRecipients($resend_api_key, $confirmation_html, $recipients, $confirmation_subject);
 
 // רישום תוצאת השליחה
-$result_log = date('Y-m-d H:i:s') . ' - תוצאת שליחת מייל אישור ללקוח: ' . json_encode($result, JSON_UNESCAPED_UNICODE) . "\n";
+$result_log = date('Y-m-d H:i:s') . ' - תוצאת שליחת מייל אישור לנמענים (' . $recipients_str . '): ' . json_encode($result, JSON_UNESCAPED_UNICODE) . "\n";
 file_put_contents($log_file, $result_log, FILE_APPEND);
 
 // אם שליחת המייל ללקוח נכשלה (כנראה כי הכתובת לא מורשית בחשבון הניסיון)
@@ -120,25 +141,25 @@ if (!$result['success'] && $customer_email !== $admin_email) {
 
 // הצגת דף אישור או שגיאה
 if ($result['success']) {
-    showSuccessPage($customer_email);
+    showSuccessPage($recipients_str);
 } else {
     showErrorPage('שגיאה בשליחת המייל: ' . $result['error']);
 }
 
 /**
- * פונקציה לשליחת מייל באמצעות Resend API
+ * פונקציה לשליחת מייל לכמה נמענים באמצעות Resend API
  */
-function sendEmailWithResend($api_key, $html_content, $to_email, $subject) {
+function sendEmailToMultipleRecipients($api_key, $html_content, $recipients, $subject) {
     global $sender_email;
-    
+
     // הגדרת נתוני המייל
     $data = [
         'from' => $sender_email,
-        'to' => [$to_email],
+        'to' => $recipients, // מערך של כתובות מייל
         'subject' => $subject,
         'html' => $html_content
     ];
-    
+
     // יצירת בקשת POST ל-API
     $ch = curl_init('https://api.resend.com/emails');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -150,13 +171,13 @@ function sendEmailWithResend($api_key, $html_content, $to_email, $subject) {
     ]);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    
+
     // ביצוע הבקשה
     $response = curl_exec($ch);
     $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
     curl_close($ch);
-    
+
     // החזרת תוצאת השליחה
     return [
         'success' => ($status_code >= 200 && $status_code < 300),
@@ -164,6 +185,13 @@ function sendEmailWithResend($api_key, $html_content, $to_email, $subject) {
         'status_code' => $status_code,
         'error' => $error
     ];
+}
+
+/**
+ * פונקציה לשליחת מייל באמצעות Resend API (תומכת גם במייל בודד)
+ */
+function sendEmailWithResend($api_key, $html_content, $to_email, $subject) {
+    return sendEmailToMultipleRecipients($api_key, $html_content, [$to_email], $subject);
 }
 
 /**

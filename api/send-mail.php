@@ -212,6 +212,11 @@ function buildAdminEmailContent($form_data) {
     $customer_email = $form_data['email'];
     $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email={$customer_email}";
 
+    // הוספת אימייל להתקנה לקישור אם קיים
+    if (!empty($form_data['installEmail'])) {
+        $approve_url .= '&install_email=' . urlencode($form_data['installEmail']);
+    }
+
     // מידע על החבילה
     $package_info = [
         'basic' => ['name' => 'בסיסי', 'size' => '2GB', 'price' => '35 ₪', 'type' => 'אחסון בענן'],
