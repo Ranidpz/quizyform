@@ -47,6 +47,11 @@
                 <p>זוהי רכישה <strong>חד-פעמית</strong> ללא חיובים חוזרים!</p>
             </div>
 
+            <div class="process-info">
+                <p>לאחר מילוי הטופס, תקבלו הודעת אימייל עם לינק לתשלום מאובטח דרך מערכת יעד.</p>
+                <p class="note"><strong>שימו לב:</strong> אם לא קיבלתם אימייל תוך מספר דקות, אנא צרו קשר עם התמיכה בטלפון 077-300-6306 או באימייל info@playzone.co.il</p>
+            </div>
+
             <!-- Package Card -->
             <div class="package-card">
                 <div class="package-header">
@@ -101,20 +106,142 @@
                         </div>
                     </div>
 
-                    <div class="purchase-action">
-                        <a href="https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=2120&Coin=1&FixTash=True&Info=10%20%FA%E1%F0%E9%E5%FA%20%EC%E4%E5%F8%E3%E4%20%E5%F1%F9%E9%EF%20%FA%EE%E9%EB%E4%20%EC%EE%F6%E8%F8%F4%E9%ED%20%E7%E3%E9%F9%ED%20&Masof=4501074534&MoreData=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=1&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=0cdf93b84c4492c0ccd6a6dec7c6f2349ed84a0089f46fb63c71c685cd31fe8d"
-                           class="purchase-button"
-                           target="_blank">
-                            <i class="fas fa-shopping-cart"></i>
-                            לרכישה מאובטחת
-                        </a>
-                        <p class="security-note">
-                            <i class="fas fa-shield-alt"></i>
-                            תשלום מאובטח באמצעות יעד - כרטיסי אשראי
-                        </p>
-                    </div>
                 </div>
             </div>
+
+            <!-- Registration Form -->
+            <form id="subscriptionForm" method="post" action="send-mail.php">
+                <noscript>
+                    <div class="message-container error">
+                        <p>הדפדפן שלך לא תומך ב-JavaScript או שהוא מושבת. חלק מהפונקציונליות עלולה להיות מוגבלת.</p>
+                    </div>
+                </noscript>
+
+                <!-- הוספת שדה סמוי לציון דף התודה ושהמנוי הוא חבילה -->
+                <input type="hidden" name="redirect" value="thank_you.html">
+                <input type="hidden" name="package" value="starter_package">
+
+                <div class="section-title">
+                    <h3><span class="step-number">1</span> פרטי לקוח</h3>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerName"><span class="required">*</span> שם מלא</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="customerName" name="customerName" required>
+                            <span class="material-icons">person</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyName">שם חברה (אם רלוונטי)</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="companyName" name="companyName">
+                            <span class="material-icons">business</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email"><span class="required">*</span> אימייל</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="email" name="email" required>
+                            <span class="material-icons">email</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone"><span class="required">*</span> טלפון</label>
+                        <div class="input-with-icon">
+                            <input type="tel" id="phone" name="phone" required>
+                            <span class="material-icons">phone</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="invoiceName">שם לחשבונית (אם שונה משם הלקוח)</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="invoiceName" name="invoiceName">
+                            <span class="material-icons">receipt</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="installEmail">שם המשתמש במערכת קוויזי גיים</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="installEmail" name="installEmail">
+                            <span class="material-icons">install_desktop</span>
+                        </div>
+                        <small class="form-text">דואל איתו אתם נכנסים למערכת שעליו נתקין את החבילה (אם שונה מהמייל הראשי שמלאתם כאן)</small>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <h3><span class="step-number">2</span> תנאי שימוש</h3>
+                </div>
+
+                <div class="terms-box">
+                    <h4>מה תקבלו</h4>
+                    <ul>
+                        <li>תוכנת Quizy Games להורדה לשולחן העבודה (לקליקרים בלבד)</li>
+                        <li>10 תבניות שעשועונים מוכנות לשימוש</li>
+                        <li>250 מגה אחסון בשרת (<a href="index.html" class="inline-link">חבילות אחסון נוספות</a> בתשלום נוסף)</li>
+                        <li>הדרכה און ליין מלאה להפעלת המערכת</li>
+                        <li>אחריות ותמיכה למשך 12 חודשים מרגע הרכישה</li>
+                    </ul>
+
+                    <h4>תנאי רכישה</h4>
+                    <ul>
+                        <li>זוהי רכישה חד-פעמית ללא חיובים חוזרים</li>
+                        <li>המחיר: 2,120 ₪ (כולל 25% הנחה למצטרפים חדשים)</li>
+                        <li>לאחר מילוי הטופס תקבלו מייל עם לינק לתשלום מאובטח</li>
+                        <li>התקנת החבילה תתבצע תוך עד 48 שעות מרגע התשלום</li>
+                    </ul>
+
+                    <p>לקריאת <a href="https://docs.google.com/document/d/19IzoVcbwZvTiFSJhXAnTnKweJgLZfLASVQFCvIvlBpo/edit?usp=sharing" target="_blank" class="terms-link">תנאי השימוש המלאים</a>.</p>
+                </div>
+
+                <!-- הודעת אבטחה -->
+                <div class="security-message">
+                    <span class="material-icons">security</span>
+                    <p>כל הפרטים שתזינו בטופס זה מאובטחים ומוגנים. הטופס מוצפן בתקן SSL ומועבר בצורה מאובטחת.</p>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="agree" name="agree" value="1" required>
+                    <label for="agree">אני מאשר/ת כי קראתי את תנאי השימוש והפרטיות ומסכים/ה להם. אני מאשר/ת קבלת חשבוניות מס/קבלה בדוא"ל.</label>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="newsletter" name="newsletter" value="1" checked>
+                    <label for="newsletter">אני מעוניין/ת להצטרף לרשימת הדיוור ולקבל עדכונים על שינויים וחידושים במערכת. כתובת המייל שלי לא תימכר לצד שלישי ותשמש לשימוש במערכת בלבד.</label>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" id="submitBtn" class="submit-button">שליחת הטופס</button>
+                </div>
+
+                <!-- הודעות שגיאה והצלחה -->
+                <div id="messageContainer" class="message-container"></div>
+            </form>
+
+            <!-- טופס גיבוי למקרה של כשל בשליחה -->
+            <form id="fallbackForm" action="direct-submit.php" method="post" style="display: none;">
+                <input type="hidden" name="customerName" id="fallback_customerName">
+                <input type="hidden" name="companyName" id="fallback_companyName">
+                <input type="hidden" name="email" id="fallback_email">
+                <input type="hidden" name="phone" id="fallback_phone">
+                <input type="hidden" name="invoiceName" id="fallback_invoiceName">
+                <input type="hidden" name="installEmail" id="fallback_installEmail">
+                <input type="hidden" name="package" id="fallback_package" value="starter_package">
+                <input type="hidden" name="termsAgree" id="fallback_termsAgree" value="1">
+                <input type="hidden" name="fallback_submission" value="true">
+                <button type="submit" id="fallbackSubmitBtn">שליחה</button>
+            </form>
 
             <!-- Additional Information -->
             <div class="info-section">
@@ -196,5 +323,13 @@
             </div>
         </footer>
     </div>
+
+    <!-- אלמנט הטעינה -->
+    <div id="loadingOverlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- סקריפט פשוט לטיפול בטופס -->
+    <script src="script.js?v=20250703094001"></script>
 </body>
 </html>
