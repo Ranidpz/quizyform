@@ -19,8 +19,16 @@ $resend_api_key = 're_STacfGs3_DaWkfkqzEvQsu2VsSm2kygxV';
 // הלקוחות צריכים לפנות ל-info@playzone.co.il ולא להשיב למייל זה
 $sender_email = 'Quizy Form <no-reply@playzones.app>';
 $admin_email = 'info@playzone.co.il';
-$admin_subject = 'בקשה חדשה למנוי אחסנת קבצים - Quizy';
-$customer_subject = 'פרטי הזמנה - מנוי אחסון קבצים Quizy';
+
+// קביעת נושא המייל בהתאם לסוג החבילה
+$is_software_package = (isset($_POST['package']) && $_POST['package'] === 'starter_package');
+if ($is_software_package) {
+    $admin_subject = 'בקשה חדשה לרכישת חבילת תוכנה - Quizy';
+    $customer_subject = 'פרטי רכישה - חבילת תוכנה Quizy';
+} else {
+    $admin_subject = 'בקשה חדשה למנוי אחסנת קבצים - Quizy';
+    $customer_subject = 'פרטי הזמנה - מנוי אחסון קבצים Quizy';
+}
 
 // הגדרת קובץ לוג
 $log_file = __DIR__ . '/form_submissions.log';
@@ -65,11 +73,14 @@ foreach ($_POST as $key => $value) {
 $order_id = uniqid('quizy_');
 $form_data['order_id'] = $order_id;
 
+// בדיקה אם זו חבילת תוכנה להורדה
+$is_software_package = (isset($form_data['package']) && $form_data['package'] === 'starter_package');
+
 // בניית תוכן המייל למנהל
-$admin_html_content = buildAdminEmailContent($form_data);
+$admin_html_content = buildAdminEmailContent($form_data, $is_software_package);
 
 // בניית תוכן המייל ללקוח
-$customer_html_content = buildCustomerEmailContent($form_data);
+$customer_html_content = buildCustomerEmailContent($form_data, $is_software_package);
 
 // שמירת עותק של המיילים
 $debug_dir = __DIR__ . '/debug_emails';
@@ -89,7 +100,7 @@ $admin_result = sendEmailWithResend($resend_api_key, $admin_html_content, $admin
 $result_log = date('Y-m-d H:i:s') . ' - תוצאת שליחת מייל למנהל: ' . json_encode($admin_result, JSON_UNESCAPED_UNICODE) . "\n";
 file_put_contents($log_file, $result_log, FILE_APPEND);
 
-// שליחת המייל ללקוח
+// שליחת המייל ללקוח - רק מייל עם לינק תשלום (לא מייל אישור!)
 $customer_result = sendEmailWithResend($resend_api_key, $customer_html_content, $form_data['email'], $customer_subject);
 
 // רישום תוצאת השליחה ללקוח
@@ -206,16 +217,12 @@ function sendEmailWithResend($api_key, $html_content, $to_email, $subject) {
 /**
  * פונקציה לבניית תוכן המייל למנהל
  */
-function buildAdminEmailContent($form_data) {
+function buildAdminEmailContent($form_data, $is_software_package = false) {
     // הוספת כפתור אישור ללקוח
     $order_id = $form_data['order_id'];
     $customer_email = $form_data['email'];
-    $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email={$customer_email}";
-
-    // הוספת אימייל להתקנה לקישור אם קיים
-    if (!empty($form_data['installEmail'])) {
-        $approve_url .= '&install_email=' . urlencode($form_data['installEmail']);
-    }
+    $package_type = $is_software_package ? 'software' : 'subscription';
+    $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email={$customer_email}&type={$package_type}";
 
     // מידע על החבילה
     $package_info = [
@@ -225,7 +232,8 @@ function buildAdminEmailContent($form_data) {
         'pro' => ['name' => 'פרו', 'size' => '15GB', 'price' => '159 ₪', 'type' => 'אחסון בענן'],
         'ultimate' => ['name' => 'אולטימייט', 'size' => '20GB', 'price' => '189 ₪', 'type' => 'אחסון בענן'],
         'pro60' => ['name' => 'PRO60', 'size' => '60 שחקנים + 1GB בענן', 'price' => '217 ₪', 'type' => 'שעשועונים און ליין'],
-        'pro300' => ['name' => 'PRO300', 'size' => '300 שחקנים + 2GB בענן', 'price' => '550 ₪', 'type' => 'שעשועונים און ליין']
+        'pro300' => ['name' => 'PRO300', 'size' => '300 שחקנים + 2GB בענן', 'price' => '550 ₪', 'type' => 'שעשועונים און ליין'],
+        'starter_package' => ['name' => 'חבילת תוכנה התחלתית', 'size' => '10 תבניות + 250MB אחסון', 'price' => '2,120 ₪', 'type' => 'רכישת חבילת תוכנה']
     ];
 
     $package = isset($form_data['package']) ? $form_data['package'] : 'premium';
@@ -239,148 +247,298 @@ function buildAdminEmailContent($form_data) {
     $submission_date = date('d/m/Y');
     $submission_time = date('H:i:s');
 
-    $html = '
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                direction: rtl;
-                text-align: right;
-                color: #333;
-                line-height: 1.6;
-            }
-            h2 {
-                color: #0078d4;
-                border-bottom: 1px solid #eee;
-                padding-bottom: 10px;
-            }
-            .package-summary {
-                background-color: #e3f2fd;
-                border: 2px solid #0078d4;
-                border-radius: 5px;
-                padding: 15px;
-                margin: 20px 0;
-            }
-            .package-summary h3 {
-                color: #0078d4;
-                margin-top: 0;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 20px 0;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: right;
-            }
-            th {
-                background-color: #f5f5f5;
-                font-weight: bold;
-            }
-            .button {
-                display: inline-block;
-                background-color: #4CAF50;
-                color: white;
-                padding: 12px 20px;
-                text-align: center;
-                text-decoration: none;
-                font-size: 16px;
-                margin: 20px 0;
-                border-radius: 4px;
-            }
-            .highlight {
-                background-color: #ffffcc;
-                padding: 10px;
-                border: 1px solid #ffeb3b;
-                margin: 20px 0;
-            }
-            .newsletter-yes {
-                color: #4CAF50;
-                font-weight: bold;
-            }
-            .newsletter-no {
-                color: #999;
-            }
-        </style>
-    </head>
-    <body>
-        <h2>בקשה חדשה למנוי - ' . htmlspecialchars($package_details['type']) . '</h2>
+    // תוכן שונה לחבילת תוכנה
+    if ($is_software_package) {
+        $html = '
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    direction: rtl;
+                    text-align: right;
+                    color: #333;
+                    line-height: 1.6;
+                }
+                h2 {
+                    color: #0078d4;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 10px;
+                }
+                .package-summary {
+                    background-color: #fff3cd;
+                    border: 2px solid #ffc107;
+                    border-radius: 5px;
+                    padding: 15px;
+                    margin: 20px 0;
+                }
+                .package-summary h3 {
+                    color: #856404;
+                    margin-top: 0;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: right;
+                }
+                th {
+                    background-color: #f5f5f5;
+                    font-weight: bold;
+                }
+                .button {
+                    display: inline-block;
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 12px 20px;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 16px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .highlight {
+                    background-color: #ffffcc;
+                    padding: 10px;
+                    border: 1px solid #ffeb3b;
+                    margin: 20px 0;
+                }
+                .newsletter-yes {
+                    color: #4CAF50;
+                    font-weight: bold;
+                }
+                .newsletter-no {
+                    color: #999;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>🎉 בקשה חדשה לרכישת חבילת תוכנה</h2>
 
-        <div class="package-summary">
-            <h3>פרטי החבילה שנרכשה:</h3>
-            <p><strong>סוג מנוי:</strong> ' . htmlspecialchars($package_details['type']) . '</p>
-            <p><strong>שם חבילה:</strong> ' . htmlspecialchars($package_details['name']) . '</p>
-            <p><strong>היקף:</strong> ' . htmlspecialchars($package_details['size']) . '</p>
-            <p><strong>מחיר חודשי:</strong> ' . htmlspecialchars($package_details['price']) . '</p>
-        </div>
+            <div class="package-summary">
+                <h3>פרטי החבילה:</h3>
+                <p><strong>סוג:</strong> רכישה חד-פעמית (לא מנוי)</p>
+                <p><strong>שם חבילה:</strong> ' . htmlspecialchars($package_details['name']) . '</p>
+                <p><strong>כולל:</strong> ' . htmlspecialchars($package_details['size']) . '</p>
+                <p><strong>מחיר חד-פעמי:</strong> ' . htmlspecialchars($package_details['price']) . '</p>
+            </div>
 
-        <h3>פרטי הלקוח:</h3>
-        <table>
-            <tr>
-                <th>שדה</th>
-                <th>ערך</th>
-            </tr>
-            <tr>
-                <td><strong>שם מלא</strong></td>
-                <td>' . htmlspecialchars($form_data['customerName'] ?? '') . '</td>
-            </tr>
-            <tr>
-                <td><strong>שם חברה</strong></td>
-                <td>' . htmlspecialchars($form_data['companyName'] ?? 'לא צוין') . '</td>
-            </tr>
-            <tr>
-                <td><strong>אימייל</strong></td>
-                <td>' . htmlspecialchars($form_data['email'] ?? '') . '</td>
-            </tr>
-            <tr>
-                <td><strong>טלפון</strong></td>
-                <td>' . htmlspecialchars($form_data['phone'] ?? '') . '</td>
-            </tr>
-            <tr>
-                <td><strong>שם לחשבונית</strong></td>
-                <td>' . htmlspecialchars($form_data['invoiceName'] ?? 'לא צוין') . '</td>
-            </tr>
-            <tr>
-                <td><strong>אימייל להתקנה</strong></td>
-                <td>' . htmlspecialchars($form_data['installEmail'] ?? 'לא צוין') . '</td>
-            </tr>
-            <tr>
-                <td><strong>מזהה הזמנה</strong></td>
-                <td>' . htmlspecialchars($order_id) . '</td>
-            </tr>
-        </table>
+            <h3>פרטי הלקוח:</h3>
+            <table>
+                <tr>
+                    <th>שדה</th>
+                    <th>ערך</th>
+                </tr>
+                <tr>
+                    <td><strong>שם מלא</strong></td>
+                    <td>' . htmlspecialchars($form_data['customerName'] ?? '') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>שם חברה</strong></td>
+                    <td>' . htmlspecialchars($form_data['companyName'] ?? 'לא צוין') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>אימייל</strong></td>
+                    <td>' . htmlspecialchars($form_data['email'] ?? '') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>טלפון</strong></td>
+                    <td>' . htmlspecialchars($form_data['phone'] ?? '') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>שם לחשבונית</strong></td>
+                    <td>' . htmlspecialchars($form_data['invoiceName'] ?? 'לא צוין') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>אימייל להתקנה</strong></td>
+                    <td>' . htmlspecialchars($form_data['installEmail'] ?? 'לא צוין') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>מזהה הזמנה</strong></td>
+                    <td>' . htmlspecialchars($order_id) . '</td>
+                </tr>
+            </table>
 
-        <h3>הסכמה לרשימת דיוור:</h3>
-        <p class="' . ($newsletter_consent === 'כן' ? 'newsletter-yes' : 'newsletter-no') . '">
-            <strong>הסכים להצטרף לרשימת הדיוור:</strong> ' . $newsletter_consent . '
-        </p>
-        ' . ($newsletter_consent === 'כן' ? '
-        <div style="background-color: #e8f5e9; padding: 10px; border-radius: 5px; margin: 10px 0;">
-            <p><strong>פרטי אישור:</strong></p>
-            <p>📅 תאריך: ' . $submission_date . '</p>
-            <p>🕐 שעה: ' . $submission_time . '</p>
-            <p>🌐 IP: ' . htmlspecialchars($user_ip) . '</p>
-            <p style="font-size: 12px; color: #666;">ניתן להוסיף לקוח זה לרשימת הדיוור במערכת</p>
-        </div>
-        ' : '<p style="font-size: 12px; color: #666;">הלקוח לא ביקש להצטרף לרשימת הדיוור</p>') . '
+            <h3>הסכמה לרשימת דיוור:</h3>
+            <p class="' . ($newsletter_consent === 'כן' ? 'newsletter-yes' : 'newsletter-no') . '">
+                <strong>הסכים להצטרף לרשימת הדיוור:</strong> ' . $newsletter_consent . '
+            </p>
+            ' . ($newsletter_consent === 'כן' ? '
+            <div style="background-color: #e8f5e9; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <p><strong>פרטי אישור:</strong></p>
+                <p>📅 תאריך: ' . $submission_date . '</p>
+                <p>🕐 שעה: ' . $submission_time . '</p>
+                <p>🌐 IP: ' . htmlspecialchars($user_ip) . '</p>
+                <p style="font-size: 12px; color: #666;">ניתן להוסיף לקוח זה לרשימת הדיוור במערכת</p>
+            </div>
+            ' : '<p style="font-size: 12px; color: #666;">הלקוח לא ביקש להצטרף לרשימת הדיוור</p>') . '
 
-        <div class="highlight">
-            <p><strong>פעולות נדרשות:</strong></p>
-            <p>1. יש לוודא שהלקוח ביצע תשלום</p>
-            <p>2. לאחר אישור התשלום, יש ללחוץ על הכפתור הבא לשליחת אישור ללקוח:</p>
-        </div>
+            <div class="highlight">
+                <p><strong>⚠️ שים לב - תהליך שונה מחבילות המנוי:</strong></p>
+                <p>1. הלקוח קיבל מייל עם לינק לתשלום חד-פעמי</p>
+                <p>2. לאחר שהלקוח משלם, בדוק במערכת התשלומים</p>
+                <p>3. כשתאשר שהתשלום התקבל, לחץ על הכפתור למטה</p>
+                <p>4. הלקוח יקבל מייל אוטומטי שהחבילה הותקנה</p>
+                <p>5. <strong>התקן את החבילה תוך 48 שעות!</strong></p>
+            </div>
 
-        <a href="' . $approve_url . '" class="button">אשר ללקוח שהמנוי פעיל</a>
+            <a href="' . $approve_url . '" class="button">✅ אישור התקנת החבילה (לחץ רק אחרי תשלום!)</a>
 
-        <p style="font-size: 12px; color: #666; margin-top: 30px;">
-            נשלח מטופס קוויזי בתאריך: ' . $submission_date . ' בשעה: ' . $submission_time . '
-        </p>
-    </body>
-    </html>';
+            <p style="font-size: 12px; color: #666; margin-top: 30px;">
+                נשלח מטופס קוויזי בתאריך: ' . $submission_date . ' בשעה: ' . $submission_time . '
+            </p>
+        </body>
+        </html>';
+    } else {
+        // תוכן רגיל למנויי אחסון/שעשועונים
+        $html = '
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    direction: rtl;
+                    text-align: right;
+                    color: #333;
+                    line-height: 1.6;
+                }
+                h2 {
+                    color: #0078d4;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 10px;
+                }
+                .package-summary {
+                    background-color: #e3f2fd;
+                    border: 2px solid #0078d4;
+                    border-radius: 5px;
+                    padding: 15px;
+                    margin: 20px 0;
+                }
+                .package-summary h3 {
+                    color: #0078d4;
+                    margin-top: 0;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: right;
+                }
+                th {
+                    background-color: #f5f5f5;
+                    font-weight: bold;
+                }
+                .button {
+                    display: inline-block;
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 12px 20px;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 16px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .highlight {
+                    background-color: #ffffcc;
+                    padding: 10px;
+                    border: 1px solid #ffeb3b;
+                    margin: 20px 0;
+                }
+                .newsletter-yes {
+                    color: #4CAF50;
+                    font-weight: bold;
+                }
+                .newsletter-no {
+                    color: #999;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>בקשה חדשה למנוי - ' . htmlspecialchars($package_details['type']) . '</h2>
+
+            <div class="package-summary">
+                <h3>פרטי החבילה שנרכשה:</h3>
+                <p><strong>סוג מנוי:</strong> ' . htmlspecialchars($package_details['type']) . '</p>
+                <p><strong>שם חבילה:</strong> ' . htmlspecialchars($package_details['name']) . '</p>
+                <p><strong>היקף:</strong> ' . htmlspecialchars($package_details['size']) . '</p>
+                <p><strong>מחיר חודשי:</strong> ' . htmlspecialchars($package_details['price']) . '</p>
+            </div>
+
+            <h3>פרטי הלקוח:</h3>
+            <table>
+                <tr>
+                    <th>שדה</th>
+                    <th>ערך</th>
+                </tr>
+                <tr>
+                    <td><strong>שם מלא</strong></td>
+                    <td>' . htmlspecialchars($form_data['customerName'] ?? '') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>שם חברה</strong></td>
+                    <td>' . htmlspecialchars($form_data['companyName'] ?? 'לא צוין') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>אימייל</strong></td>
+                    <td>' . htmlspecialchars($form_data['email'] ?? '') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>טלפון</strong></td>
+                    <td>' . htmlspecialchars($form_data['phone'] ?? '') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>שם לחשבונית</strong></td>
+                    <td>' . htmlspecialchars($form_data['invoiceName'] ?? 'לא צוין') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>אימייל להתקנה</strong></td>
+                    <td>' . htmlspecialchars($form_data['installEmail'] ?? 'לא צוין') . '</td>
+                </tr>
+                <tr>
+                    <td><strong>מזהה הזמנה</strong></td>
+                    <td>' . htmlspecialchars($order_id) . '</td>
+                </tr>
+            </table>
+
+            <h3>הסכמה לרשימת דיוור:</h3>
+            <p class="' . ($newsletter_consent === 'כן' ? 'newsletter-yes' : 'newsletter-no') . '">
+                <strong>הסכים להצטרף לרשימת הדיוור:</strong> ' . $newsletter_consent . '
+            </p>
+            ' . ($newsletter_consent === 'כן' ? '
+            <div style="background-color: #e8f5e9; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <p><strong>פרטי אישור:</strong></p>
+                <p>📅 תאריך: ' . $submission_date . '</p>
+                <p>🕐 שעה: ' . $submission_time . '</p>
+                <p>🌐 IP: ' . htmlspecialchars($user_ip) . '</p>
+                <p style="font-size: 12px; color: #666;">ניתן להוסיף לקוח זה לרשימת הדיוור במערכת</p>
+            </div>
+            ' : '<p style="font-size: 12px; color: #666;">הלקוח לא ביקש להצטרף לרשימת הדיוור</p>') . '
+
+            <div class="highlight">
+                <p><strong>פעולות נדרשות:</strong></p>
+                <p>1. יש לוודא שהלקוח ביצע תשלום</p>
+                <p>2. לאחר אישור התשלום, יש ללחוץ על הכפתור הבא לשליחת אישור ללקוח:</p>
+            </div>
+
+            <a href="' . $approve_url . '" class="button">אשר ללקוח שהמנוי פעיל</a>
+
+            <p style="font-size: 12px; color: #666; margin-top: 30px;">
+                נשלח מטופס קוויזי בתאריך: ' . $submission_date . ' בשעה: ' . $submission_time . '
+            </p>
+        </body>
+        </html>';
+    }
 
     return $html;
 }
@@ -388,7 +546,7 @@ function buildAdminEmailContent($form_data) {
 /**
  * פונקציה לבניית תוכן המייל ללקוח
  */
-function buildCustomerEmailContent($form_data) {
+function buildCustomerEmailContent($form_data, $is_software_package = false) {
     // קביעת קישור התשלום בהתאם לחבילה שנבחרה
     $payment_links = [
         'basic' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=35&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%EC%E0%E7%F1%E5%EF%20%EE%E3%E9%E4%20%E1%F2%F0%EF%202GB&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=b639bedf70b5f3376e48630379c8f83648be252a396151be240045033d764534',
@@ -397,7 +555,8 @@ function buildCustomerEmailContent($form_data) {
         'pro' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=159&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%EC%E0%E7%F1%E5%EF%20%EE%E3%E9%E4%20%E1%F2%F0%EF%2015GB&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=fc89d18680ff0f30a792399497ee038b4838b4d675b245597bcde6204214e82f',
         'ultimate' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=189&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%EC%E0%E7%F1%E5%EF%20%EE%E3%E9%E4%20%E1%F2%F0%EF%2020GB&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=8d401301e0d0471981d199dddcb425ce849df47ba3105bace019c4830d260bee',
         'pro60' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=217&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%F2%E3%2060%20%F9%E7%F7%F0%E9%ED%20%E0%E5%EF%20%EC%E9%E9%EF&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=cacc9cfc23b87f1b2bb585ce6858ac097e94988bf9509fb118f4c8615619216d',
-        'pro300' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=550&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%F2%E3%20300%20%F9%E7%F7%F0%E9%ED%20%E0%E5%EF%20%EC%E9%E9%EF&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=90a6cfc2942dce89ee4911d800760688eedbf7817b1c16f8fa6ba28ed572e88c'
+        'pro300' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=550&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%F2%E3%20300%20%F9%E7%F7%F0%E9%ED%20%E0%E5%EF%20%EC%E9%E9%EF&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=90a6cfc2942dce89ee4911d800760688eedbf7817b1c16f8fa6ba28ed572e88c',
+        'starter_package' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=2120&Coin=1&FixTash=True&Info=10%20%FA%E1%F0%E9%E5%FA%20%EC%E4%E5%F8%E3%E4%20%E5%F1%F9%E9%EF%20%FA%EE%E9%EB%E4%20%EC%EE%F6%E8%F8%F4%E9%ED%20%E7%E3%E9%F9%ED%20&Masof=4501074534&MoreData=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=1&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=0cdf93b84c4492c0ccd6a6dec7c6f2349ed84a0089f46fb63c71c685cd31fe8d'
     ];
     
     $package = isset($form_data['package']) ? $form_data['package'] : 'premium';
@@ -411,12 +570,128 @@ function buildCustomerEmailContent($form_data) {
         'pro' => ['name' => 'פרו', 'size' => '15GB', 'price' => '159 ₪'],
         'ultimate' => ['name' => 'אולטימייט', 'size' => '20GB', 'price' => '189 ₪'],
         'pro60' => ['name' => 'PRO60', 'size' => '60 שחקנים', 'price' => '217 ₪'],
-        'pro300' => ['name' => 'PRO300', 'size' => '300 שחקנים', 'price' => '550 ₪']
+        'pro300' => ['name' => 'PRO300', 'size' => '300 שחקנים', 'price' => '550 ₪'],
+        'starter_package' => ['name' => 'חבילת תוכנה התחלתית', 'size' => '10 תבניות + תוכנה', 'price' => '2,120 ₪']
     ];
-    
+
     $package_name = isset($package_info[$package]) ? $package_info[$package]['name'] : 'פרימיום';
     $package_size = isset($package_info[$package]) ? $package_info[$package]['size'] : '10GB';
     $package_price = isset($package_info[$package]) ? $package_info[$package]['price'] : '118 ₪';
+
+    // תוכן שונה לחבילת תוכנה
+    if ($is_software_package) {
+        $html = '
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    direction: rtl;
+                    text-align: right;
+                    color: #333;
+                    line-height: 1.6;
+                    max-width: 600px;
+                    margin: 0 auto;
+                }
+                h2 {
+                    color: #0078d4;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 10px;
+                }
+                .package-info {
+                    background-color: #fff3cd;
+                    border: 2px solid #ffc107;
+                    border-radius: 5px;
+                    padding: 15px;
+                    margin: 20px 0;
+                }
+                .package-name {
+                    font-size: 18px;
+                    font-weight: bold;
+                    color: #856404;
+                }
+                .package-details {
+                    margin: 10px 0;
+                }
+                .button {
+                    display: inline-block;
+                    background-color: #0078d4;
+                    color: white;
+                    padding: 15px 30px;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 18px;
+                    font-weight: bold;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                .note {
+                    background-color: #e7f3ff;
+                    padding: 15px;
+                    border: 1px solid #0078d4;
+                    margin: 20px 0;
+                    font-size: 14px;
+                }
+                .footer {
+                    margin-top: 30px;
+                    padding-top: 15px;
+                    border-top: 1px solid #eee;
+                    font-size: 14px;
+                    color: #666;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>🎉 תודה על הרכישה!</h2>
+
+            <p>שלום ' . htmlspecialchars($form_data['customerName']) . ',</p>
+
+            <p>תודה שבחרת לרכוש את חבילת התוכנה ההתחלתית של Quizy Games! פרטי הרכישה שלך התקבלו בהצלחה.</p>
+
+            <div class="package-info">
+                <div class="package-name">חבילת תוכנה התחלתית</div>
+                <div class="package-details">
+                    <p><strong>החבילה כוללת:</strong></p>
+                    <ul>
+                        <li>תוכנת Quizy Games להורדה לשולחן העבודה</li>
+                        <li>10 תבניות שעשועונים מוכנות לשימוש</li>
+                        <li>250 מגה אחסון בשרת (31 ימי עסקי)</li>
+                        <li>הדרכה און ליין מלאה</li>
+                        <li>אחריות ותמיכה ל-12 חודשים</li>
+                    </ul>
+                    <p><strong>מחיר חד-פעמי:</strong> ' . $package_price . '</p>
+                </div>
+            </div>
+
+            <p><strong>השלב הבא:</strong> לצורך השלמת הרכישה, יש לבצע תשלום באמצעות הקישור הבא:</p>
+
+            <div style="text-align: center;">
+                <a href="' . $payment_link . '" class="button">💳 לחצו כאן לתשלום מאובטח</a>
+            </div>
+
+            <div class="note">
+                <p><strong>⏰ חשוב לדעת:</strong></p>
+                <ul>
+                    <li>זוהי רכישה <strong>חד-פעמית</strong> ללא חיובים חוזרים</li>
+                    <li>לאחר ביצוע התשלום, נתקין את החבילה תוך <strong>48 שעות</strong></li>
+                    <li>תקבלו מייל נוסף כשהחבילה תותקן במערכת</li>
+                    <li>ניתן להתחיל ליצור ולהוריד את התוכנה מיד לאחר ההתקנה</li>
+                </ul>
+            </div>
+
+            <div class="footer">
+                <p>אם יש לכם שאלות או אם אתם זקוקים לעזרה, אנחנו כאן בשבילכם!</p>
+                <p><strong>צוות Quizy Games</strong><br>
+                טלפון: 077-300-6306<br>
+                אימייל: info@playzone.co.il</p>
+                <p style="color: #ff0000; font-size: 12px;">שימו לב: זהו מייל אוטומטי ולא ניתן להשיב אליו ישירות. לכל שאלה או בקשה, אנא פנו אלינו ב-info@playzone.co.il</p>
+            </div>
+        </body>
+        </html>';
+
+        return $html;
+    }
 
     // בדיקה אם זה מנוי PRO (שעשועונים) או Cloud (אחסון)
     $is_pro_package = ($package === 'pro60' || $package === 'pro300');

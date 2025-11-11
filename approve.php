@@ -256,7 +256,7 @@ function buildConfirmationEmail($order_id, $customer_email, $is_software_package
                 <ul>
                     <li><strong>התקנת החבילה תתבצע תוך 48 שעות</strong></li>
                     <li>תקבל/י הודעה כשהחבילה מוכנה לשימוש</li>
-                    <li>לאחר ההתקנה, תוכל/י להתחיל ליצור ולהוריד שעשועונים</li>
+                    <li>אתם יכולים כבר להתחיל ולהפיק את השעשועונים, אבל ההורדה תתאפשר רק לאחר התקנת החבילה</li>
                 </ul>
 
                 <p><strong>יש בעיה או שאלה?</strong> צרו קשר:</p>
