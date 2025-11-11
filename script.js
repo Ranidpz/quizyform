@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function validateForm() {
         let isValid = true;
-        
+
         // Validate required inputs
         const requiredInputs = form.querySelectorAll('input[required]');
         requiredInputs.forEach(input => {
@@ -394,44 +394,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 isValid = validateInput.call(input) && isValid;
             }
         });
-        
-        // Validate package selection
-        const selectedPackage = document.querySelector('input[name="package"]:checked');
-        if (!selectedPackage) {
-            // Show error message
-            const errorMessage = document.createElement('div');
-            errorMessage.className = 'package-error-message';
-            errorMessage.textContent = 'אנא בחרו חבילת אחסון';
-            errorMessage.style.color = 'var(--error-color)';
-            errorMessage.style.textAlign = 'center';
-            errorMessage.style.marginTop = '10px';
-            errorMessage.style.fontWeight = 'bold';
-            
-            // Remove any existing error messages
-            const existingError = document.querySelector('.package-error-message');
-            if (existingError) {
-                existingError.remove();
+
+        // Validate package selection - רק אם יש בחירת חבילות בדף
+        const storageOptionsDiv = document.querySelector('.storage-options');
+        if (storageOptionsDiv) {
+            const selectedPackage = document.querySelector('input[name="package"]:checked');
+            if (!selectedPackage) {
+                // Show error message
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'package-error-message';
+                errorMessage.textContent = 'אנא בחרו חבילת אחסון';
+                errorMessage.style.color = 'var(--error-color)';
+                errorMessage.style.textAlign = 'center';
+                errorMessage.style.marginTop = '10px';
+                errorMessage.style.fontWeight = 'bold';
+
+                // Remove any existing error messages
+                const existingError = document.querySelector('.package-error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                // Add the error message after the storage options
+                storageOptionsDiv.after(errorMessage);
+
+                // Scroll to the error message
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                isValid = false;
+            } else {
+                // Remove any existing error messages
+                const existingError = document.querySelector('.package-error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                // Make sure packageSelected is true if a package is checked
+                packageSelected = true;
             }
-            
-            // Add the error message after the storage options
-            const storageOptions = document.querySelector('.storage-options');
-            storageOptions.after(errorMessage);
-            
-            // Scroll to the error message
-            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            isValid = false;
-        } else {
-            // Remove any existing error messages
-            const existingError = document.querySelector('.package-error-message');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            // Make sure packageSelected is true if a package is checked
-            packageSelected = true;
         }
-        
+
         return isValid;
     }
     
@@ -444,43 +446,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log('מתחיל תהליך שליחת טופס...');
 
-        // Validate the form first
+        // Validate the form first (includes all validations including package selection)
         if (!validateForm()) {
             console.log('הטופס לא תקין');
             return;
         }
 
-        // בדיקה שנבחרה חבילה - רק אם יש בחירת חבילות בדף
-        const storageOptionsDiv = document.querySelector('.storage-options');
-        if (storageOptionsDiv && !packageSelected) {
-            showMessage('יש לבחור חבילת אחסון לפני שליחת הטופס', 'error');
-            storageOptionsDiv.scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
+        console.log('הטופס תקין, ממשיך לשליחה...');
 
-        // בדיקה שאושרו תנאי השימוש
-        const agreeCheckbox = document.getElementById('agree');
-        let termsAgreed = false;
-        
-        if (agreeCheckbox) {
-            termsAgreed = agreeCheckbox.checked || 
-                          agreeCheckbox.getAttribute('checked') === 'checked' || 
-                          agreeCheckbox.hasAttribute('checked');
-        }
-        
-        if (!termsAgreed) {
-            showMessage('יש לאשר את תנאי השימוש לפני שליחת הטופס', 'error');
-            if (agreeCheckbox) {
-                agreeCheckbox.scrollIntoView({ behavior: 'smooth' });
-                try {
-                    agreeCheckbox.focus();
-                } catch (e) {
-                    console.warn('Could not focus checkbox:', e);
-                }
-            }
-            return;
-        }
-        
         // הצגת אנימציית טעינה
         const submitButton = document.getElementById('submitBtn');
         if (submitButton) {
@@ -497,14 +470,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         console.log('שולח טופס...');
-        
+
         // שליחת הטופס ישירות ל-PHP
         form.action = 'send-mail.php';
         form.method = 'post';
-        
+
         // הוספת שדה מוסתר להפניה לדף תודה
         addHiddenField('redirect', 'thank_you.html');
-        
+
         // שליחת הטופס
         try {
             form.submit();
