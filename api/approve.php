@@ -23,23 +23,31 @@ $admin_email = 'info@playzone.co.il';
 // הגדרת קובץ לוג
 $log_file = __DIR__ . '/form_submissions.log';
 
-// בדיקת פרמטרים
-$order_id = isset($_GET['order_id']) ? $_GET['order_id'] : '';
-$customer_email = isset($_GET['email']) ? $_GET['email'] : '';
-$type = isset($_GET['type']) ? $_GET['type'] : 'subscription'; // ברירת מחדל: מנוי
+// בדיקת פרמטרים - תמיכה ב-GET וגם ב-POST
+$order_id = isset($_POST['order_id']) ? $_POST['order_id'] : (isset($_GET['order_id']) ? $_GET['order_id'] : '');
+$customer_email = isset($_POST['email']) ? $_POST['email'] : (isset($_GET['email']) ? $_GET['email'] : '');
+$type = isset($_POST['type']) ? $_POST['type'] : (isset($_GET['type']) ? $_GET['type'] : 'subscription');
 
 // בדיקה אם זו חבילת תוכנה
 $is_software_package = ($type === 'software');
-
-// רישום לוג של הבקשה
-$log_data = date('Y-m-d H:i:s') . ' - בקשת אישור ' . ($is_software_package ? 'חבילת תוכנה' : 'מנוי') . ': ' . $order_id . ' עבור ' . $customer_email . "\n";
-file_put_contents($log_file, $log_data, FILE_APPEND);
 
 // בדיקת תקינות הפרמטרים
 if (empty($order_id) || empty($customer_email) || !filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
     showErrorPage('פרמטרים חסרים או לא תקינים');
     exit;
 }
+
+// בדיקה אם זו בקשת GET (אז נציג דף אישור) או POST (אז נשלח את המייל)
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    // זו בקשת GET - נציג דף אישור במקום לשלוח מייל מיד
+    // כך מונעים שליחה אוטומטית כאשר Gmail או אנטי-וירוס סורקים את הלינק
+    showConfirmationPage($order_id, $customer_email, $type);
+    exit;
+}
+
+// רישום לוג של הבקשה
+$log_data = date('Y-m-d H:i:s') . ' - בקשת אישור ' . ($is_software_package ? 'חבילת תוכנה' : 'מנוי') . ': ' . $order_id . ' עבור ' . $customer_email . "\n";
+file_put_contents($log_file, $log_data, FILE_APPEND);
 
 // בניית תוכן המייל ללקוח
 $confirmation_html = buildConfirmationEmail($order_id, $customer_email, $is_software_package);
@@ -131,6 +139,155 @@ if ($result['success']) {
     showSuccessPage($customer_email);
 } else {
     showErrorPage('שגיאה בשליחת המייל: ' . $result['error']);
+}
+
+/**
+ * פונקציה להצגת דף אישור לפני שליחת המייל
+ * זה מונע שליחה אוטומטית כאשר Gmail או אנטי-וירוס סורקים את הלינק
+ */
+function showConfirmationPage($order_id, $customer_email, $type) {
+    $is_software = ($type === 'software');
+    $title = $is_software ? 'חבילת תוכנה' : 'מנוי';
+
+    echo '<!DOCTYPE html>
+    <html lang="he" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>אישור ' . htmlspecialchars($title) . ' | Quizy</title>
+        <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: "Assistant", sans-serif;
+                background-color: #f5f7fa;
+                margin: 0;
+                padding: 0;
+                direction: rtl;
+                text-align: right;
+                color: #333;
+            }
+            .container {
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 30px;
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+            .warning-icon {
+                font-size: 64px;
+                color: #ffc107;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            h1 {
+                color: #0078d4;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            p {
+                font-size: 18px;
+                line-height: 1.6;
+                margin-bottom: 20px;
+            }
+            .details {
+                background-color: #f5f7fa;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+            }
+            .warning-box {
+                background-color: #fff3cd;
+                border: 2px solid #ffc107;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                color: #856404;
+            }
+            .button-container {
+                text-align: center;
+                margin-top: 30px;
+            }
+            .confirm-button {
+                background-color: #28a745;
+                color: white;
+                padding: 15px 40px;
+                border: none;
+                border-radius: 5px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .confirm-button:hover {
+                background-color: #218838;
+            }
+            .cancel-button {
+                background-color: #dc3545;
+                color: white;
+                padding: 15px 40px;
+                border: none;
+                border-radius: 5px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                margin-right: 10px;
+                transition: background-color 0.3s;
+                text-decoration: none;
+                display: inline-block;
+            }
+            .cancel-button:hover {
+                background-color: #c82333;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="warning-icon">⚠️</div>
+            <h1>אישור ' . htmlspecialchars($title) . '</h1>
+
+            <p><strong>האם אתה בטוח שברצונך לאשר את ה' . htmlspecialchars($title) . ' הזה?</strong></p>
+
+            <div class="details">
+                <p><strong>מזהה הזמנה:</strong> ' . htmlspecialchars($order_id) . '</p>
+                <p><strong>כתובת מייל לקוח:</strong> ' . htmlspecialchars($customer_email) . '</p>
+                <p><strong>סוג:</strong> ' . htmlspecialchars($title) . '</p>
+            </div>
+
+            <div class="warning-box">
+                <h3>⚠️ שים לב!</h3>';
+
+    if ($is_software) {
+        echo '
+                <p>לאחר אישור, הפעולות הבאות יתבצעו:</p>
+                <ul>
+                    <li>הלקוח יקבל מייל אישור התקנה</li>
+                    <li>המייל יודיע שהחבילה תותקן תוך 48 שעות</li>
+                    <li>הלקוח יוכל להתחיל ולהפיק שעשועונים, אך ההורדה תתאפשר רק לאחר ההתקנה</li>
+                </ul>';
+    } else {
+        echo '
+                <p>לאחר אישור, הפעולות הבאות יתבצעו:</p>
+                <ul>
+                    <li>הלקוח יקבל מייל אישור הפעלת מנוי</li>
+                    <li>המנוי יופעל מיידית</li>
+                    <li>הלקוח יוכל להתחיל להשתמש בשירות</li>
+                </ul>';
+    }
+
+    echo '
+            </div>
+
+            <form method="POST" action="" class="button-container">
+                <input type="hidden" name="order_id" value="' . htmlspecialchars($order_id) . '">
+                <input type="hidden" name="email" value="' . htmlspecialchars($customer_email) . '">
+                <input type="hidden" name="type" value="' . htmlspecialchars($type) . '">
+                <a href="https://quizygame.com" class="cancel-button">ביטול</a>
+                <button type="submit" class="confirm-button">✓ אישור ושליחת מייל ללקוח</button>
+            </form>
+        </div>
+    </body>
+    </html>';
 }
 
 /**
