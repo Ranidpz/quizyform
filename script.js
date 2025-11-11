@@ -1,38 +1,44 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log("טופס קוויזי נטען - גרסה 20250703094001");
-    
+
     // Form elements
     const form = document.getElementById('subscriptionForm');
     const submitBtn = document.getElementById('submitBtn');
     const storageOptions = document.querySelectorAll('.storage-option');
     const packageButtons = document.querySelectorAll('.select-package-btn');
     const packageRadios = document.querySelectorAll('input[name="package"]');
-    
+
     // מעקב אחר בחירת חבילה
     let packageSelected = false;
-    
-    // הסרת כל הסימונים בטעינת הדף
-    packageRadios.forEach(radio => {
-        radio.checked = false;
-        const storageOption = radio.closest('.storage-option');
-        if (storageOption) {
-            storageOption.classList.remove('active');
-        }
-    });
-    
-    packageButtons.forEach(btn => {
-        btn.classList.remove('selected');
-        btn.textContent = 'בחירה';
-    });
-    
+
+    // הסרת כל הסימונים בטעינת הדף - רק אם יש אלמנטים
+    if (packageRadios.length > 0) {
+        packageRadios.forEach(radio => {
+            radio.checked = false;
+            const storageOption = radio.closest('.storage-option');
+            if (storageOption) {
+                storageOption.classList.remove('active');
+            }
+        });
+    }
+
+    if (packageButtons.length > 0) {
+        packageButtons.forEach(btn => {
+            btn.classList.remove('selected');
+            btn.textContent = 'בחירה';
+        });
+    }
+
     // Initialize the form
-    initializeForm();
-    
-    // Add event listeners
-    form.addEventListener('submit', handleSubmit);
-    
-    // Add click event to all select buttons
-    packageButtons.forEach(button => {
+    if (form) {
+        initializeForm();
+        // Add event listeners
+        form.addEventListener('submit', handleSubmit);
+    }
+
+    // Add click event to all select buttons - רק אם יש כפתורים
+    if (packageButtons.length > 0) {
+        packageButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             
@@ -106,10 +112,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show and update features section
             showFeaturesSection(packageId);
         });
-    });
-    
-    // Add click event to package labels for better UX
-    document.querySelectorAll('.package-label').forEach(label => {
+        });
+    }
+
+    // Add click event to package labels for better UX - רק אם יש labels
+    const packageLabels = document.querySelectorAll('.package-label');
+    if (packageLabels.length > 0) {
+        packageLabels.forEach(label => {
         label.addEventListener('click', function(e) {
             // Prevent default only if the click was directly on the label (not on the button)
             if (e.target === this || !e.target.classList.contains('select-package-btn')) {
@@ -121,8 +130,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-    });
-    
+        });
+    }
+
     /**
      * Initialize the form and set default values
      */
