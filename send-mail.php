@@ -100,7 +100,7 @@ $admin_result = sendEmailWithResend($resend_api_key, $admin_html_content, $admin
 $result_log = date('Y-m-d H:i:s') . ' - תוצאת שליחת מייל למנהל: ' . json_encode($admin_result, JSON_UNESCAPED_UNICODE) . "\n";
 file_put_contents($log_file, $result_log, FILE_APPEND);
 
-// שליחת המייל ללקוח
+// שליחת המייל ללקוח - רק מייל עם לינק תשלום (לא מייל אישור!)
 $customer_result = sendEmailWithResend($resend_api_key, $customer_html_content, $form_data['email'], $customer_subject);
 
 // רישום תוצאת השליחה ללקוח
@@ -221,7 +221,8 @@ function buildAdminEmailContent($form_data, $is_software_package = false) {
     // הוספת כפתור אישור ללקוח
     $order_id = $form_data['order_id'];
     $customer_email = $form_data['email'];
-    $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email={$customer_email}";
+    $package_type = $is_software_package ? 'software' : 'subscription';
+    $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email={$customer_email}&type={$package_type}";
 
     // מידע על החבילה
     $package_info = [
@@ -555,7 +556,7 @@ function buildCustomerEmailContent($form_data, $is_software_package = false) {
         'ultimate' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=189&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%EC%E0%E7%F1%E5%EF%20%EE%E3%E9%E4%20%E1%F2%F0%EF%2020GB&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=8d401301e0d0471981d199dddcb425ce849df47ba3105bace019c4830d260bee',
         'pro60' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=217&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%F2%E3%2060%20%F9%E7%F7%F0%E9%ED%20%E0%E5%EF%20%EC%E9%E9%EF&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=cacc9cfc23b87f1b2bb585ce6858ac097e94988bf9509fb118f4c8615619216d',
         'pro300' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=550&Coin=1&FixTash=False&HK=True&Info=%EE%F0%E5%E9%20%F2%E3%20300%20%F9%E7%F7%F0%E9%ED%20%E0%E5%EF%20%EC%E9%E9%EF&Masof=4501074534&MoreData=True&OnlyOnApprove=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=999&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=90a6cfc2942dce89ee4911d800760688eedbf7817b1c16f8fa6ba28ed572e88c',
-        'starter_package' => 'https://secure.cardcom.solutions/e/gtI4'
+        'starter_package' => 'https://icom.yaad.net/cgi-bin/yaadpay/yaadpay.pl?Amount=2120&Coin=1&FixTash=True&Info=10%20%FA%E1%F0%E9%E5%FA%20%EC%E4%E5%F8%E3%E4%20%E5%F1%F9%E9%EF%20%FA%EE%E9%EB%E4%20%EC%EE%F6%E8%F8%F4%E9%ED%20%E7%E3%E9%F9%ED%20&Masof=4501074534&MoreData=True&PageLang=HEB&Postpone=False&ShowEngTashText=True&Tash=1&UTF8out=True&action=pay&freq=1&sendemail=True&tmp=3&signature=0cdf93b84c4492c0ccd6a6dec7c6f2349ed84a0089f46fb63c71c685cd31fe8d'
     ];
     
     $package = isset($form_data['package']) ? $form_data['package'] : 'premium';
