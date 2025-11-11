@@ -441,19 +441,23 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function handleSubmit(e) {
         e.preventDefault();
-        
+
+        console.log('מתחיל תהליך שליחת טופס...');
+
         // Validate the form first
         if (!validateForm()) {
+            console.log('הטופס לא תקין');
             return;
         }
-        
-        // בדיקה שנבחרה חבילה
-        if (!packageSelected) {
+
+        // בדיקה שנבחרה חבילה - רק אם יש בחירת חבילות בדף
+        const storageOptionsDiv = document.querySelector('.storage-options');
+        if (storageOptionsDiv && !packageSelected) {
             showMessage('יש לבחור חבילת אחסון לפני שליחת הטופס', 'error');
-            document.querySelector('.storage-options').scrollIntoView({ behavior: 'smooth' });
+            storageOptionsDiv.scrollIntoView({ behavior: 'smooth' });
             return;
         }
-        
+
         // בדיקה שאושרו תנאי השימוש
         const agreeCheckbox = document.getElementById('agree');
         let termsAgreed = false;
@@ -481,14 +485,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitButton = document.getElementById('submitBtn');
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = 'שולח...';
+            submitButton.innerHTML = '<span class="loading-indicator"></span> מבצע שליחה...';
+            submitButton.style.opacity = '0.7';
+            submitButton.style.cursor = 'not-allowed';
         }
-        
+
         // הצגת אוברליי טעינה
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.className = 'loading-overlay';
-        loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
-        document.body.appendChild(loadingOverlay);
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        console.log('שולח טופס...');
         
         // שליחת הטופס ישירות ל-PHP
         form.action = 'send-mail.php';
@@ -502,17 +510,21 @@ document.addEventListener('DOMContentLoaded', function() {
             form.submit();
         } catch (submitError) {
             console.error('Error submitting form:', submitError);
-            
+
             // הסרת אוברליי טעינה
-            loadingOverlay.remove();
-            
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+
             // שחזור כפתור השליחה
             if (submitButton) {
                 submitButton.disabled = false;
                 submitButton.textContent = 'שליחת הטופס';
+                submitButton.style.opacity = '1';
+                submitButton.style.cursor = 'pointer';
             }
-            
-            showError('אירעה שגיאה בשליחת הטופס. אנא צרו קשר עם התמיכה בטלפון 077-300-6306.');
+
+            showMessage('אירעה שגיאה בשליחת הטופס. אנא צרו קשר עם התמיכה בטלפון 077-300-6306.', 'error');
         }
     }
     
