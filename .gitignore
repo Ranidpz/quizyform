@@ -43,3 +43,5 @@ node_modules/
 # Temporary uploads
 uploads/temp/
 
+.vercel
+.env*.local
