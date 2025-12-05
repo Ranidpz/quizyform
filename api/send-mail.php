@@ -43,9 +43,9 @@ if (!$resend_api_key) {
 $approve_secret_token = getenv('APPROVE_SECRET_TOKEN');
 
 // הגדרת כתובות מייל
-// חשוב: השתמש בדומיין המאומת playzones.app לשליחת מיילים
+// חשוב: השתמש בדומיין המאומת playzone.co.il לשליחת מיילים
 // הלקוחות צריכים לפנות ל-info@playzone.co.il ולא להשיב למייל זה
-$sender_email = 'Quizy Form <no-reply@playzones.app>';
+$sender_email = 'Quizy Form <no-reply@playzone.co.il>';
 $admin_email = getenv('ADMIN_EMAIL') ?: 'info@playzone.co.il';
 
 // קביעת נושא המייל בהתאם לסוג החבילה

@@ -127,7 +127,7 @@ $resend_api_key = getenv('RESEND_API_KEY');
                 echo '<h3>שלב 2: שליחת מייל בדיקה</h3>';
 
                 $data = [
-                    'from' => 'Quizy Test <no-reply@playzones.app>',
+                    'from' => 'Quizy Test <no-reply@playzone.co.il>',
                     'to' => [$test_email],
                     'subject' => '🧪 בדיקת מערכת Quizy - ' . date('H:i:s'),
                     'html' => '
