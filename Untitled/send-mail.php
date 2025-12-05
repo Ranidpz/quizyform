@@ -12,7 +12,7 @@ ini_set('display_errors', 0);
 header('Content-Type: text/html; charset=utf-8');
 
 // מפתח ה-API של Resend - ישירות בקוד לפשטות
-$resend_api_key = 're_STacfGs3_DaWkfkqzEvQsu2VsSm2kygxV';
+$resend_api_key = 're_Nai69qNs_AUAe1EHqyHJZtWWte4rD8AKp';
 
 // הגדרת כתובות מייל
 // חשוב: השתמש בדומיין המאומת playzones.app לשליחת מיילים

@@ -36,12 +36,42 @@
   ],
   "routes": [
     {
+      "src": "/\\.env$",
+      "status": 404
+    },
+    {
+      "src": "/.*\\.log$",
+      "status": 404
+    },
+    {
+      "src": "/debug_emails/.*",
+      "status": 404
+    },
+    {
+      "src": "/\\.htaccess$",
+      "status": 404
+    },
+    {
+      "src": "/\\.gitignore$",
+      "status": 404
+    },
+    {
       "src": "/favicon.ico",
       "dest": "/favicon.ico"
     },
     {
       "src": "/(.*)",
       "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" }
+      ]
     }
   ]
 }

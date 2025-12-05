@@ -6,10 +6,11 @@ form_submissions.log
 # Debug emails (local testing only)
 debug_emails/
 
-# Environment variables
+# Environment variables - NEVER commit!
 .env
 .env.local
 .env.production
+api/.env
 
 # IDE files
 .vscode/

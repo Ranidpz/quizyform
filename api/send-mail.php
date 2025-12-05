@@ -1,7 +1,7 @@
 <?php
 /**
  * Quizy Form - קובץ שליחת מיילים
- * 
+ *
  * קובץ זה מטפל בשליחת מיילים מטופס ההרשמה לשירותי אחסון של קוויזי
  * באמצעות Resend API
  */
@@ -11,14 +11,42 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 header('Content-Type: text/html; charset=utf-8');
 
-// מפתח ה-API של Resend - ישירות בקוד לפשטות
-$resend_api_key = 're_STacfGs3_DaWkfkqzEvQsu2VsSm2kygxV';
+// טעינת משתני סביבה מקובץ .env
+function loadEnv($path) {
+    if (!file_exists($path)) {
+        return false;
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!getenv($name)) {
+            putenv("$name=$value");
+        }
+    }
+    return true;
+}
+loadEnv(__DIR__ . '/.env');
+
+// מפתח ה-API של Resend - נטען מקובץ env מוגן
+$resend_api_key = getenv('RESEND_API_KEY');
+if (!$resend_api_key) {
+    error_log('RESEND_API_KEY not found in environment');
+    header("Location: error.html?type=config_error");
+    exit;
+}
+
+// טוקן סודי לאישור הזמנות
+$approve_secret_token = getenv('APPROVE_SECRET_TOKEN');
 
 // הגדרת כתובות מייל
 // חשוב: השתמש בדומיין המאומת playzones.app לשליחת מיילים
 // הלקוחות צריכים לפנות ל-info@playzone.co.il ולא להשיב למייל זה
 $sender_email = 'Quizy Form <no-reply@playzones.app>';
-$admin_email = 'info@playzone.co.il';
+$admin_email = getenv('ADMIN_EMAIL') ?: 'info@playzone.co.il';
 
 // קביעת נושא המייל בהתאם לסוג החבילה
 $is_software_package = (isset($_POST['package']) && $_POST['package'] === 'starter_package');
@@ -37,13 +65,43 @@ $log_file = __DIR__ . '/form_submissions.log';
 $log_data = date('Y-m-d H:i:s') . ' - התקבלה בקשה חדשה: ' . json_encode($_POST, JSON_UNESCAPED_UNICODE) . "\n";
 file_put_contents($log_file, $log_data, FILE_APPEND);
 
+// רשימת דפי הפניה מורשים (הגנה מפני Open Redirect)
+$allowed_redirects = [
+    'thank_you.html',
+    'thank_you_software.html',
+    'error.html',
+    '/thank_you.html',
+    '/thank_you_software.html',
+    '/error.html'
+];
+
+// פונקציה לוולידציית הפניה בטוחה
+function getSafeRedirect($requested_redirect, $allowed_list, $default = 'thank_you.html') {
+    if (empty($requested_redirect)) {
+        return $default;
+    }
+    // בדיקה שההפניה ברשימה המורשית
+    if (in_array($requested_redirect, $allowed_list)) {
+        return $requested_redirect;
+    }
+    // בדיקה שזה לא URL חיצוני
+    if (preg_match('/^https?:\/\//i', $requested_redirect)) {
+        return $default; // חסום URLs חיצוניים
+    }
+    // בדיקה שזה לא protocol-relative URL
+    if (strpos($requested_redirect, '//') === 0) {
+        return $default;
+    }
+    return $default;
+}
+
 // בדיקה שיש נתונים בטופס
 if (empty($_POST) || (count($_POST) === 1 && isset($_POST['redirect']))) {
     $error_log = date('Y-m-d H:i:s') . " - לא התקבלו נתונים בטופס\n";
     file_put_contents($log_file, $error_log, FILE_APPEND);
-    
-    // הפניה לדף תודה בכל מקרה
-    $redirect_url = isset($_POST['redirect']) ? $_POST['redirect'] : 'thank_you.html';
+
+    // הפניה בטוחה לדף תודה
+    $redirect_url = getSafeRedirect($_POST['redirect'] ?? '', $allowed_redirects);
     header("Location: $redirect_url");
     exit;
 }
@@ -168,8 +226,8 @@ if (!$customer_result['success'] && $form_data['email'] !== $admin_email) {
     file_put_contents($log_file, $result_log, FILE_APPEND);
 }
 
-// הפניה לדף תודה
-$redirect_url = isset($_POST['redirect']) ? $_POST['redirect'] : 'thank_you.html';
+// הפניה בטוחה לדף תודה
+$redirect_url = getSafeRedirect($_POST['redirect'] ?? '', $allowed_redirects);
 header("Location: $redirect_url");
 exit;
 
@@ -218,11 +276,18 @@ function sendEmailWithResend($api_key, $html_content, $to_email, $subject) {
  * פונקציה לבניית תוכן המייל למנהל
  */
 function buildAdminEmailContent($form_data, $is_software_package = false) {
-    // הוספת כפתור אישור ללקוח
+    global $approve_secret_token;
+
+    // הוספת כפתור אישור ללקוח עם טוקן מאובטח
     $order_id = $form_data['order_id'];
     $customer_email = $form_data['email'];
     $package_type = $is_software_package ? 'software' : 'subscription';
-    $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email={$customer_email}&type={$package_type}";
+
+    // יצירת חתימה מאובטחת לאישור (HMAC)
+    $signature_data = $order_id . '|' . $customer_email . '|' . $package_type;
+    $signature = hash_hmac('sha256', $signature_data, $approve_secret_token);
+
+    $approve_url = "https://quizyform.vercel.app/approve.php?order_id={$order_id}&email=" . urlencode($customer_email) . "&type={$package_type}&sig={$signature}";
 
     // מידע על החבילה
     $package_info = [

@@ -1,7 +1,7 @@
 <?php
 /**
  * Quizy Form - קובץ אישור מנוי
- * 
+ *
  * קובץ זה מטפל באישור מנוי ושליחת מייל אישור ללקוח
  * באמצעות Resend API
  */
@@ -11,14 +11,47 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 header('Content-Type: text/html; charset=utf-8');
 
-// מפתח ה-API של Resend - ישירות בקוד לפשטות
-$resend_api_key = 're_STacfGs3_DaWkfkqzEvQsu2VsSm2kygxV';
+// טעינת משתני סביבה מקובץ .env
+function loadEnv($path) {
+    if (!file_exists($path)) {
+        return false;
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!getenv($name)) {
+            putenv("$name=$value");
+        }
+    }
+    return true;
+}
+loadEnv(__DIR__ . '/.env');
+
+// מפתח ה-API של Resend - נטען מקובץ env מוגן
+$resend_api_key = getenv('RESEND_API_KEY');
+if (!$resend_api_key) {
+    error_log('RESEND_API_KEY not found in environment');
+    showErrorPage('שגיאת תצורה - אנא פנה למנהל המערכת');
+    exit;
+}
+
+// טוקן סודי לאישור הזמנות
+$approve_secret_token = getenv('APPROVE_SECRET_TOKEN');
+if (!$approve_secret_token) {
+    error_log('APPROVE_SECRET_TOKEN not found in environment');
+    showErrorPage('שגיאת תצורה - אנא פנה למנהל המערכת');
+    exit;
+}
 
 // הגדרת כתובות מייל
 // חשוב: השתמש בדומיין המאומת playzones.app לשליחת מיילים
 // הלקוחות צריכים לפנות ל-info@playzone.co.il ולא להשיב למייל זה
 $sender_email = 'Quizy Form <no-reply@playzones.app>';
-$admin_email = 'info@playzone.co.il';
+$admin_email = getenv('ADMIN_EMAIL') ?: 'info@playzone.co.il';
 
 // הגדרת קובץ לוג
 $log_file = __DIR__ . '/form_submissions.log';
@@ -27,6 +60,7 @@ $log_file = __DIR__ . '/form_submissions.log';
 $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : '';
 $customer_email = isset($_GET['email']) ? $_GET['email'] : '';
 $type = isset($_GET['type']) ? $_GET['type'] : 'subscription'; // ברירת מחדל: מנוי
+$signature = isset($_GET['sig']) ? $_GET['sig'] : '';
 
 // בדיקה אם זו חבילת תוכנה
 $is_software_package = ($type === 'software');
@@ -38,6 +72,19 @@ file_put_contents($log_file, $log_data, FILE_APPEND);
 // בדיקת תקינות הפרמטרים
 if (empty($order_id) || empty($customer_email) || !filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
     showErrorPage('פרמטרים חסרים או לא תקינים');
+    exit;
+}
+
+// אימות החתימה - הגנה מפני גישה לא מורשית
+$expected_signature_data = $order_id . '|' . $customer_email . '|' . $type;
+$expected_signature = hash_hmac('sha256', $expected_signature_data, $approve_secret_token);
+
+if (!hash_equals($expected_signature, $signature)) {
+    // רישום ניסיון גישה לא מורשה
+    $security_log = date('Y-m-d H:i:s') . " - SECURITY: ניסיון גישה לא מורשה לאישור הזמנה - order_id: $order_id, email: $customer_email, IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . "\n";
+    file_put_contents($log_file, $security_log, FILE_APPEND);
+
+    showErrorPage('גישה לא מורשית - הלינק אינו תקין או פג תוקף');
     exit;
 }
 
